@@ -67,6 +67,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 using System.Security.Cryptography;
+using System.Diagnostics;
 
 namespace SharpAESCrypt
 {
@@ -995,6 +996,54 @@ namespace SharpAESCrypt
         }
 
         /// <summary>
+        /// Encrypts string using the supplied password
+        /// </summary>
+        /// <param name="password">The password to encrypt with</param>
+        /// <param name="inputStringContent">original string content</param>
+        /// <returns>encrypted result via base64 encoding</returns>
+        public static string EncryptString(string password, string inputStringContent)
+        {
+            byte[] data = EncryptStringData(password, inputStringContent);
+            string outputContent = Convert.ToBase64String(data);
+            return outputContent;
+        }
+
+        /// <summary>
+        /// Encrypts string using the supplied password
+        /// </summary>
+        /// <param name="password">The password to encrypt with</param>
+        /// <param name="inputStringContent">original string content</param>
+        /// <returns>encrypted result</returns>
+        public static byte[] EncryptStringData(string password, string inputStringContent)
+        {
+            using (MemoryStream infs = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(inputStringContent)))
+            using (MemoryStream outfs = new MemoryStream())
+            {
+                Encrypt(password, infs, outfs);
+                //outfs.Position = 0;
+                var data = outfs.ToArray();
+                return data;
+            }
+        }
+
+        /// <summary>
+        /// decrypt string content
+        /// </summary>
+        /// <param name="password"></param>
+        /// <param name="encrypted_data"></param>
+        /// <returns></returns>
+        public static string DecryptStringData(string password,byte[] encrypted_data)
+        {
+            using (MemoryStream infs = new MemoryStream(encrypted_data))
+            using (MemoryStream outfs = new MemoryStream())
+            {
+                Decrypt(password, infs, outfs);
+                var data = outfs.ToArray();
+                string content = System.Text.Encoding.UTF8.GetString(data);
+                return content;
+            }
+        }
+        /// <summary>
         /// Decrypts a file using the supplied password
         /// </summary>
         /// <param name="password">The password to decrypt with</param>
@@ -1069,6 +1118,11 @@ namespace SharpAESCrypt
             }
         }
 
+        public SharpAESCrypt(string password, Stream stream,KeyValuePair<string,byte[]> target_header,OperationMode mode)
+            :this(password,stream,mode)
+        {
+            this.m_extensions.Add(target_header);
+        }
         /// <summary>
         /// Gets or sets the version number.
         /// Note that this can only be set when encrypting, 
@@ -1195,6 +1249,11 @@ namespace SharpAESCrypt
         /// 加密进度报告（同步输入进度报告会损耗一些性能，请斟酌处理）
         /// </summary>
         public event Action<EncryptProgressReportEventArgs> EncryptProgressReport;
+
+        /// <summary>
+        /// 执行结束报告
+        /// </summary>
+        public event Action<EncryptCompleteReportEventArgs> EncryptOrDeEncryptCompleteReport;
 
         /// <summary>
         /// Writes unencrypted data into an encrypted stream
@@ -1324,29 +1383,113 @@ namespace SharpAESCrypt
         /// <summary>
         /// Encrypts a file using the supplied password
         /// </summary>
-        /// <param name="password">The password to encrypt with</param>
-        /// <param name="input">The file with unencrypted data</param>
-        /// <param name="output">The encrypted output file</param>
-        public async System.Threading.Tasks.Task EncryptFileAsync(string inputfile)
+        /// <param name="inputfile">The file with unencrypted data</param>
+        /// <param name="output_filename">output file name.if null or empty that will be used encrypted file name</param>
+        /// <param name="blockSize">split block size (byte unit)</param>
+        public async System.Threading.Tasks.Task EncryptFileAsync(string inputfile,string output_filename = "",int blockSize = -1)
         {
             await System.Threading.Tasks.Task.Run(() =>
             {
+                Stopwatch stopwatch = new Stopwatch();
+                stopwatch.Start();
                 int a;
                 long encrypted_data_size = 0;
-                byte[] buffer = new byte[1024 * 4];
-                using (FileStream infs = File.OpenRead(inputfile))
+                int buffer_size = 1024 * 4;
+                byte[] buffer = new byte[buffer_size];
+                if (blockSize > 0)
                 {
-                    this.BeginEncrypt?.Invoke(new BeginEnryptEventArgs() { OriginalFileSize = infs.Length });
-                    while ((a = infs.Read(buffer, 0, buffer.Length)) != 0)
+                    if (blockSize > buffer_size)
                     {
-                        this.Write(buffer, 0, a);
-                        encrypted_data_size += a;
-                        this.EncryptProgressReport?.Invoke(new EncryptProgressReportEventArgs(infs.Length, encrypted_data_size, a));
+                        do
+                        {
+                            using (FileStream infs = File.OpenRead(inputfile))
+                            {
+                                this.BeginEncrypt?.Invoke(new BeginEnryptEventArgs() { OriginalFileSize = infs.Length });
+                                while ((a = infs.Read(buffer, 0, buffer.Length)) != 0)
+                                {
+                                    this.Write(buffer, 0, a);
+                                    encrypted_data_size += a;
+                                    this.EncryptProgressReport?.Invoke(new EncryptProgressReportEventArgs(infs.Length, encrypted_data_size, a));
+                                }
+                                this.FlushFinalBlock();
+                            }
+                        } while (true);
                     }
-                    this.FlushFinalBlock();
+                    else
+                    {
+                        using (FileStream infs = File.OpenRead(inputfile))
+                        {
+                            this.BeginEncrypt?.Invoke(new BeginEnryptEventArgs() { OriginalFileSize = infs.Length });
+                            while ((a = infs.Read(buffer, 0, buffer.Length)) != 0)
+                            {
+                                this.Write(buffer, 0, a);
+                                encrypted_data_size += a;
+                                this.EncryptProgressReport?.Invoke(new EncryptProgressReportEventArgs(infs.Length, encrypted_data_size, a));
+                            }
+                            this.FlushFinalBlock();
+                        }
+                    }
                 }
+                else
+                {
+                    //if (string.IsNullOrEmpty(output_filename))
+                    //{
+
+                    //}
+                    using (FileStream infs = File.OpenRead(inputfile))
+                    {
+                        this.BeginEncrypt?.Invoke(new BeginEnryptEventArgs() { OriginalFileSize = infs.Length });
+                        while ((a = infs.Read(buffer, 0, buffer.Length)) != 0)
+                        {
+                            this.Write(buffer, 0, a);
+                            encrypted_data_size += a;
+                            this.EncryptProgressReport?.Invoke(new EncryptProgressReportEventArgs(infs.Length, encrypted_data_size, a));
+                        }
+                        this.FlushFinalBlock();
+                    }
+                }
+                stopwatch.Stop();
+                double speed = encrypted_data_size / stopwatch.Elapsed.TotalSeconds;
+                this.EncryptOrDeEncryptCompleteReport?.Invoke(new EncryptCompleteReportEventArgs()
+                {
+                    Elapsed = stopwatch.Elapsed,
+                    WriteSpeed = speed
+                });
             });
         }
+
+        public async System.Threading.Tasks.Task DecryptFileAsync(string outputfile)
+        {
+            await System.Threading.Tasks.Task.Run(() =>
+           {
+               int a;
+               long decrypted_data_size = 0;
+               int buffer_size = 1024 * 4;
+               byte[] buffer = new byte[buffer_size];
+               //SharpAESCrypt c = new SharpAESCrypt(password, input, OperationMode.Decrypt);
+
+               Stopwatch stopwatch = new Stopwatch();
+               stopwatch.Start();
+               using (FileStream outfs = File.Create(outputfile))
+               {
+                   this.BeginEncrypt?.Invoke(new BeginEnryptEventArgs() { OriginalFileSize = m_stream.Length });
+                   while ((a = this.Read(buffer, 0, buffer.Length)) != 0)
+                   {
+                       outfs.Write(buffer, 0, a);
+                       decrypted_data_size += a;
+                       this.EncryptProgressReport?.Invoke(new EncryptProgressReportEventArgs(m_stream.Length, decrypted_data_size, a));
+                   }
+               }
+               stopwatch.Stop();
+               double speed = decrypted_data_size / stopwatch.Elapsed.TotalSeconds;
+               this.EncryptOrDeEncryptCompleteReport?.Invoke(new EncryptCompleteReportEventArgs()
+               {
+                   Elapsed = stopwatch.Elapsed,
+                   WriteSpeed = speed
+               });
+           });
+        }
+
         /// <summary>
         /// Main function, used when compiled as a standalone executable
         /// </summary>
@@ -1539,4 +1682,35 @@ namespace SharpAESCrypt
             EncryptedBlockSize = encryptedBlockSize;
         }
     }
+
+    public class EncryptCompleteReportEventArgs : EventArgs
+    {
+        /// <summary>
+        /// 数据写入速度
+        /// </summary>
+        public double WriteSpeed { get; set; }
+
+        public string WriteSpeedReadable { get
+        {
+            string speed = "0";
+            if (WriteSpeed <= 0)
+                return "0B/s";
+            else if(WriteSpeed > 1024 && WriteSpeed < (1024 * 1024))
+            {
+               speed = Math.Round(WriteSpeed / 1024, 2) + "KB/s";
+            }
+            else
+            {
+                speed = Math.Round(WriteSpeed / (1024 * 1024), 2) + "MB/s";
+            }
+            return speed;
+        }
+    }
+
+    /// <summary>
+    /// 耗时多少秒
+    /// </summary>
+    public TimeSpan Elapsed { get; set; }
+    }
+
 }

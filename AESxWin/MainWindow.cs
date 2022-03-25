@@ -1,21 +1,17 @@
-﻿using System;
+﻿using AESxWin.Helpers;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Diagnostics;
-using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using AESxWin.Helpers;
-using System.Threading;
 
 namespace AESxWin
 {
     public partial class MainWindow : Form
     {
+        private static readonly string ORIGINAL_FILENAME = "OFN";
+
         public MainWindow()
         {
             InitializeComponent();
@@ -38,6 +34,7 @@ namespace AESxWin
         private void MainWindow_Load(object sender, EventArgs e)
         {
             lstExts.SelectedIndex = 6;
+            this.lblSpeed.Text = string.Empty;
         }
 
         private void btnAddFile_Click(object sender, EventArgs e)
@@ -107,29 +104,38 @@ namespace AESxWin
         }
 
         private async void btnEncrypt_Click(object sender, EventArgs e)
-            {
+        {
             var count = 0;
             var paths = lstPaths.Items;
-            
-            this.Log("Encryption Started.");
 
+            this.Log("Encryption Started.");
+            this.lblSpeed.Text = string.Empty;
             if (paths != null && paths.Count > 0)
             {
+                this.btnEncrypt.Enabled = false;
                 foreach (string path in paths)
                 {
-
                     if (File.Exists(path)) // Is File 
                     {
                         if (path.CheckExtension(lstExts.Text.ParseExtensions()))
                         {
                             try
                             {
-                                string outputfile = path + ".aes";
+                                string folder = Path.GetDirectoryName(path);
+                                string fileName = Path.GetFileName(path);
+                                var fileName_data = SharpAESCrypt.SharpAESCrypt.EncryptStringData(txtPassword.Text,fileName);
+                                KeyValuePair<string, byte[]> extension_header = new KeyValuePair<string, byte[]>(ORIGINAL_FILENAME, fileName_data);
+
+                                //string outputfile = Path.Combine(folder,fileName + ".aes");
+                                //string outputfile = path + ".aes";
+                                string outputfile = Path.Combine(folder, Path.GetRandomFileName() + ".aes");
+
                                 using (FileStream outfs = File.Create(outputfile))
                                 {
-                                    var aes = new SharpAESCrypt.SharpAESCrypt(txtPassword.Text, outfs, SharpAESCrypt.OperationMode.Encrypt);
-                                    aes.BeginEncrypt += Aes_BeginEncrypt;
-                                    aes.EncryptProgressReport += Aes_EncryptProgressReport;
+                                    var aes = new SharpAESCrypt.SharpAESCrypt(txtPassword.Text, outfs, extension_header, SharpAESCrypt.OperationMode.Encrypt);
+                                    ////aes.BeginEncrypt += Aes_BeginEncrypt;
+                                    ////aes.EncryptProgressReport += Aes_EncryptProgressReport;
+                                    aes.EncryptOrDeEncryptCompleteReport += Aes_EncryptOrDeEncryptCompleteReport;
                                     await aes.EncryptFileAsync(path);
                                 }
 
@@ -146,7 +152,6 @@ namespace AESxWin
 
                                 this.Log(path + " " + ex.Message);
                             }
-
                         }
                     }
                     if (Directory.Exists(path)) // Is Folder
@@ -173,6 +178,7 @@ namespace AESxWin
                                             var aes = new SharpAESCrypt.SharpAESCrypt(txtPassword.Text, outfs, SharpAESCrypt.OperationMode.Encrypt);
                                             aes.BeginEncrypt += Aes_BeginEncrypt;
                                             aes.EncryptProgressReport += Aes_EncryptProgressReport;
+                                            aes.EncryptOrDeEncryptCompleteReport += Aes_EncryptOrDeEncryptCompleteReport;
                                             await aes.EncryptFileAsync(file);
                                         }
                                         this.Log(file + " Encrypted.");
@@ -189,7 +195,7 @@ namespace AESxWin
                                 }
                                 else
                                 {
-                                  //  this.Log(file + " Ignored.");
+                                    //  this.Log(file + " Ignored.");
                                 }
                             }
                             this.progressEncryptAllFiles.PerformStep();
@@ -197,12 +203,12 @@ namespace AESxWin
 
 
                     }
-
-
                 }
             }
 
             this.Log($"Finished : {count} File(s) Encrypted.");
+            if (!this.btnEncrypt.Enabled)
+                this.btnEncrypt.Enabled = true;
         }
 
         private void Aes_EncryptProgressReport(SharpAESCrypt.EncryptProgressReportEventArgs obj)
@@ -230,6 +236,8 @@ namespace AESxWin
                     this.progressEncrypt.Maximum = (int)obj.OriginalFileSize;
                     this.progressEncrypt.Minimum = 0;
                     this.progressEncrypt.Value = 0;
+                    this.progressEncrypt.Visible = true;
+                    this.progressEncryptAllFiles.Visible = true;
                 }));
             }
             else
@@ -239,15 +247,33 @@ namespace AESxWin
          
         }
 
+        private void Aes_EncryptOrDeEncryptCompleteReport(SharpAESCrypt.EncryptCompleteReportEventArgs obj)
+        {
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new Action(() =>
+                {
+                    this.lblSpeed.Text = obj.WriteSpeedReadable;
+                    this.progressEncrypt.Visible = false;
+                    this.progressEncryptAllFiles.Visible = false;
+                }));
+            }
+            else
+            {
+                Aes_EncryptOrDeEncryptCompleteReport(obj);
+            }
+        }
+
         private async void btnDecrypt_Click(object sender, EventArgs e)
         {
             var count = 0;
             var paths = lstPaths.Items;
 
             this.Log("Decryption Started.");
-
+            this.lblSpeed.Text = string.Empty;
             if (paths.Count > 0)
             {
+                this.btnDecrypt.Enabled = false;
                 foreach (string path in paths)
                 {
 
@@ -255,7 +281,34 @@ namespace AESxWin
                     {
                         try
                         {
-                            await path.DecryptFileAsync(txtPassword.Text);
+                            var folder = Path.GetDirectoryName(path);
+
+                            var outputfile = path.RemoveExtension();
+
+                            using (FileStream infs = File.OpenRead(path))
+                            {
+                                var aes = new SharpAESCrypt.SharpAESCrypt(txtPassword.Text, infs, SharpAESCrypt.OperationMode.Decrypt);
+                                aes.BeginEncrypt += Aes_BeginEncrypt;
+                                aes.EncryptProgressReport += Aes_EncryptProgressReport;
+                                aes.EncryptOrDeEncryptCompleteReport += Aes_EncryptOrDeEncryptCompleteReport;
+                                await aes.DecryptFileAsync(outputfile);
+                                if(null != aes.Extensions && aes.Extensions.Count > 0)
+                                {
+                                    foreach (var item in aes.Extensions)
+                                    {
+                                        Console.WriteLine(item.Key + " ----> " +  System.Text.Encoding.UTF8.GetString(item.Value));
+                                    }
+
+                                    if (aes.Extensions.Any(ext => ext.Key.Equals(ORIGINAL_FILENAME)))
+                                    {
+                                        var filename_extension = aes.Extensions.First(ext => ext.Key.Equals(ORIGINAL_FILENAME));
+                                        var original_file_name = SharpAESCrypt.SharpAESCrypt.DecryptStringData(this.txtPassword.Text, filename_extension.Value);
+                                        string target_fileName = Path.Combine(folder, original_file_name);
+                                        File.Move(outputfile, target_fileName);
+                                    }
+                                }
+                            }
+                            //await path.DecryptFileAsync(txtPassword.Text);
                             this.Log(path + " Decrypted.");
                             count++;
 
@@ -315,6 +368,8 @@ namespace AESxWin
             }
 
             this.Log($"Finished : {count} File(s) Decrypted.");
+            if (!this.btnDecrypt.Enabled)
+                this.btnDecrypt.Enabled = true;
         }
 
         private void lblInfo_Click(object sender, EventArgs e)
@@ -350,7 +405,7 @@ namespace AESxWin
                 .IncludeUppercase().Next();
             this.txtPassword.PasswordChar = '\0';
             this.txtPassword.Text = pwd;
-            File.WriteAllText(Path.Combine(Application.StartupPath, "PWD-"+DateTime.Now.ToString("yyyyMMddHHmmss")), pwd);
+            File.WriteAllText(Path.Combine(Application.StartupPath, "PWD-"+DateTime.Now.ToString("yyyyMMddHHmmss") + ".txt"), pwd);
         }
         int blockSize = -1; 
         private void cmbBlockSizeList_SelectedIndexChanged(object sender, EventArgs e)
@@ -376,9 +431,7 @@ namespace AESxWin
                         blockSize = 1024 * 1024 * 500;
                         break;
                     case "自定义":
-                        {
-                            this.nudCustomBlockSize.Enabled = true;
-                        }
+                            blockSize = 1024 * 1024 * (int)this.nudCustomBlockSize.Value;
                         break;
                     default:
                         break;

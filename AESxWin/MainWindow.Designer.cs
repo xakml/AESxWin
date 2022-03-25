@@ -51,10 +51,11 @@
             this.progressEncrypt = new System.Windows.Forms.ProgressBar();
             this.progressEncryptAllFiles = new System.Windows.Forms.ProgressBar();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.label2 = new System.Windows.Forms.Label();
-            this.nudCustomBlockSize = new System.Windows.Forms.NumericUpDown();
-            this.cmbBlockSizeList = new System.Windows.Forms.ComboBox();
             this.label3 = new System.Windows.Forms.Label();
+            this.cmbBlockSizeList = new System.Windows.Forms.ComboBox();
+            this.nudCustomBlockSize = new System.Windows.Forms.NumericUpDown();
+            this.label2 = new System.Windows.Forms.Label();
+            this.lblSpeed = new System.Windows.Forms.Label();
             this.gbPaths.SuspendLayout();
             this.gbOptions.SuspendLayout();
             this.gbPassword.SuspendLayout();
@@ -299,6 +300,7 @@
             this.progressEncrypt.Name = "progressEncrypt";
             this.progressEncrypt.Size = new System.Drawing.Size(572, 10);
             this.progressEncrypt.TabIndex = 7;
+            this.progressEncrypt.Visible = false;
             // 
             // progressEncryptAllFiles
             // 
@@ -307,6 +309,7 @@
             this.progressEncryptAllFiles.Name = "progressEncryptAllFiles";
             this.progressEncryptAllFiles.Size = new System.Drawing.Size(572, 15);
             this.progressEncryptAllFiles.TabIndex = 8;
+            this.progressEncryptAllFiles.Visible = false;
             // 
             // groupBox1
             // 
@@ -321,14 +324,31 @@
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Split options";
             // 
-            // label2
+            // label3
             // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(29, 30);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(65, 12);
-            this.label2.TabIndex = 0;
-            this.label2.Text = "Block Size";
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(333, 30);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(17, 12);
+            this.label3.TabIndex = 3;
+            this.label3.Text = "MB";
+            // 
+            // cmbBlockSizeList
+            // 
+            this.cmbBlockSizeList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbBlockSizeList.FormattingEnabled = true;
+            this.cmbBlockSizeList.Items.AddRange(new object[] {
+            "10M",
+            "50M",
+            "100M",
+            "200M",
+            "500M",
+            "自定义"});
+            this.cmbBlockSizeList.Location = new System.Drawing.Point(100, 27);
+            this.cmbBlockSizeList.Name = "cmbBlockSizeList";
+            this.cmbBlockSizeList.Size = new System.Drawing.Size(146, 20);
+            this.cmbBlockSizeList.TabIndex = 2;
+            this.cmbBlockSizeList.SelectedIndexChanged += new System.EventHandler(this.cmbBlockSizeList_SelectedIndexChanged);
             // 
             // nudCustomBlockSize
             // 
@@ -353,31 +373,23 @@
             0,
             0});
             // 
-            // cmbBlockSizeList
+            // label2
             // 
-            this.cmbBlockSizeList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbBlockSizeList.FormattingEnabled = true;
-            this.cmbBlockSizeList.Items.AddRange(new object[] {
-            "10M",
-            "50M",
-            "100M",
-            "200M",
-            "500M",
-            "自定义"});
-            this.cmbBlockSizeList.Location = new System.Drawing.Point(100, 27);
-            this.cmbBlockSizeList.Name = "cmbBlockSizeList";
-            this.cmbBlockSizeList.Size = new System.Drawing.Size(146, 20);
-            this.cmbBlockSizeList.TabIndex = 2;
-            this.cmbBlockSizeList.SelectedIndexChanged += new System.EventHandler(this.cmbBlockSizeList_SelectedIndexChanged);
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(29, 30);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(65, 12);
+            this.label2.TabIndex = 0;
+            this.label2.Text = "Block Size";
             // 
-            // label3
+            // lblSpeed
             // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(333, 30);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(17, 12);
-            this.label3.TabIndex = 3;
-            this.label3.Text = "MB";
+            this.lblSpeed.AutoSize = true;
+            this.lblSpeed.Location = new System.Drawing.Point(231, 347);
+            this.lblSpeed.Name = "lblSpeed";
+            this.lblSpeed.Size = new System.Drawing.Size(41, 12);
+            this.lblSpeed.TabIndex = 10;
+            this.lblSpeed.Text = "label4";
             // 
             // MainWindow
             // 
@@ -385,6 +397,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(572, 531);
+            this.Controls.Add(this.lblSpeed);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.progressEncrypt);
             this.Controls.Add(this.progressEncryptAllFiles);
@@ -412,6 +425,7 @@
             this.groupBox1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nudCustomBlockSize)).EndInit();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -443,6 +457,7 @@
         private System.Windows.Forms.ComboBox cmbBlockSizeList;
         private System.Windows.Forms.NumericUpDown nudCustomBlockSize;
         private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label lblSpeed;
     }
 }
 
