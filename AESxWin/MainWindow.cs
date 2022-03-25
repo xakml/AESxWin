@@ -133,8 +133,8 @@ namespace AESxWin
                                 using (FileStream outfs = File.Create(outputfile))
                                 {
                                     var aes = new SharpAESCrypt.SharpAESCrypt(txtPassword.Text, outfs, extension_header, SharpAESCrypt.OperationMode.Encrypt);
-                                    ////aes.BeginEncrypt += Aes_BeginEncrypt;
-                                    ////aes.EncryptProgressReport += Aes_EncryptProgressReport;
+                                    aes.BeginEncrypt += Aes_BeginEncrypt;
+                                    aes.EncryptProgressReport += Aes_EncryptProgressReport;
                                     aes.EncryptOrDeEncryptCompleteReport += Aes_EncryptOrDeEncryptCompleteReport;
                                     await aes.EncryptFileAsync(path);
                                 }
@@ -171,11 +171,18 @@ namespace AESxWin
                                 {
                                     try
                                     {
+                                        string folder = path;
+                                        string fileName = Path.GetFileName(file);
+                                        var fileName_data = SharpAESCrypt.SharpAESCrypt.EncryptStringData(txtPassword.Text, fileName);
+                                        KeyValuePair<string, byte[]> extension_header = new KeyValuePair<string, byte[]>(ORIGINAL_FILENAME, fileName_data);
+
                                         //await file.EncryptFileAsync(txtPassword.Text);
-                                        string outputfile = file + ".aes";
+                                        //string outputfile = file + ".aes";
+
+                                        string outputfile = Path.Combine(folder, Path.GetRandomFileName() + ".aes");
                                         using (FileStream outfs = File.Create(outputfile))
                                         {
-                                            var aes = new SharpAESCrypt.SharpAESCrypt(txtPassword.Text, outfs, SharpAESCrypt.OperationMode.Encrypt);
+                                            var aes = new SharpAESCrypt.SharpAESCrypt(txtPassword.Text, outfs, extension_header, SharpAESCrypt.OperationMode.Encrypt);
                                             aes.BeginEncrypt += Aes_BeginEncrypt;
                                             aes.EncryptProgressReport += Aes_EncryptProgressReport;
                                             aes.EncryptOrDeEncryptCompleteReport += Aes_EncryptOrDeEncryptCompleteReport;
