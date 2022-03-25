@@ -11,7 +11,6 @@ namespace AESxWin.Helpers
     public static class FilesHelper
     {
 
-
         public static async Task EncryptFileAsync(this string path, string password)
         {
             await Task.Run(() =>
@@ -127,4 +126,33 @@ namespace AESxWin.Helpers
         }
 
     }
+
+    //public class AESCryptHelper
+    //{
+    //    public long MaxValue { get; set; }
+
+    //    public long MinValue { get; set; }
+
+    //    public async Task<AESCryptHelper> ReadyToStart(Action<ReadyArguments> action)
+    //    {
+
+    //    }
+
+    //    public async Task<AESCryptHelper> Start()
+    //    {
+
+    //    }
+
+    //    public async Task Complete()
+    //    {
+
+    //    }
+
+    //    public class ReadyArguments
+    //    {
+    //        public long MaxValue { get; set; }
+
+    //        public long MinValue { get; set; }
+    //    }
+    //}
 }

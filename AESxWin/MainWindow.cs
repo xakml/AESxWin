@@ -38,7 +38,6 @@ namespace AESxWin
         private void MainWindow_Load(object sender, EventArgs e)
         {
             lstExts.SelectedIndex = 6;
-
         }
 
         private void btnAddFile_Click(object sender, EventArgs e)
@@ -108,7 +107,7 @@ namespace AESxWin
         }
 
         private async void btnEncrypt_Click(object sender, EventArgs e)
-        {
+            {
             var count = 0;
             var paths = lstPaths.Items;
             
@@ -125,6 +124,16 @@ namespace AESxWin
                         {
                             try
                             {
+                                string outputfile = path + ".aes";
+                                using (FileStream outfs = File.Create(outputfile))
+                                {
+                                    var aes = new SharpAESCrypt.SharpAESCrypt(txtPassword.Text, outfs, SharpAESCrypt.OperationMode.Encrypt);
+                                    aes.BeginEncrypt += Aes_BeginEncrypt;
+                                    aes.EncryptProgressReport += Aes_EncryptProgressReport;
+                                    await aes.EncryptFileAsync(path);
+                                }
+
+
                                 await path.EncryptFileAsync(txtPassword.Text);
                                 this.Log(path + " Encrypted.");
                                 count++;
@@ -181,11 +190,41 @@ namespace AESxWin
                 }
             }
 
-
-
             this.Log($"Finished : {count} File(s) Encrypted.");
+        }
 
+        private void Aes_EncryptProgressReport(SharpAESCrypt.EncryptProgressReportEventArgs obj)
+        {
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new Action(()=> 
+                {
+                if (obj.EncryptedDataSize > this.progressEncrypt.Maximum) return;
+                this.progressEncrypt.Value = (int)obj.EncryptedDataSize;
+                }));
+            }
+            else
+            {
+                Aes_EncryptProgressReport(obj);
+            }
+        }
 
+        private void Aes_BeginEncrypt(SharpAESCrypt.BeginEnryptEventArgs obj)
+        {
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new Action(() =>
+                {
+                    this.progressEncrypt.Maximum = (int)obj.OriginalFileSize;
+                    this.progressEncrypt.Minimum = 0;
+                    this.progressEncrypt.Value = 0;
+                }));
+            }
+            else
+            {
+                Aes_BeginEncrypt(obj);
+            }
+         
         }
 
         private async void btnDecrypt_Click(object sender, EventArgs e)

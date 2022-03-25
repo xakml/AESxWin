@@ -942,6 +942,8 @@ namespace SharpAESCrypt
         /// </summary>
         public static byte DefaultFileVersion = MAX_FILE_VERSION;
 
+        
+        
         /// <summary>
         /// Encrypts a stream using the supplied password
         /// </summary>
@@ -951,10 +953,16 @@ namespace SharpAESCrypt
         public static void Encrypt(string password, Stream input, Stream output)
         {
             int a;
+            long encrypted_data_size = 0;
             byte[] buffer = new byte[1024 * 4];
             SharpAESCrypt c = new SharpAESCrypt(password, output, OperationMode.Encrypt);
+            c.BeginEncrypt?.Invoke(new BeginEnryptEventArgs() { OriginalFileSize = input.Length });
             while ((a = input.Read(buffer, 0, buffer.Length)) != 0)
+            {
                 c.Write(buffer, 0, a);
+                encrypted_data_size += a;
+                c.EncryptProgressReport?.Invoke(new EncryptProgressReportEventArgs(input.Length, encrypted_data_size, a));
+            }
             c.FlushFinalBlock();
         }
 
@@ -1179,6 +1187,16 @@ namespace SharpAESCrypt
         }
 
         /// <summary>
+        /// 开始执行加密之前触发的事件
+        /// </summary>
+        public event Action<BeginEnryptEventArgs> BeginEncrypt;
+
+        /// <summary>
+        /// 加密进度报告（同步输入进度报告会损耗一些性能，请斟酌处理）
+        /// </summary>
+        public event Action<EncryptProgressReportEventArgs> EncryptProgressReport;
+
+        /// <summary>
         /// Writes unencrypted data into an encrypted stream
         /// </summary>
         /// <param name="buffer">The data to write</param>
@@ -1265,8 +1283,70 @@ namespace SharpAESCrypt
             }
         }
 
-        #endregion
+        /// <summary>
+        /// Encrypts a stream using the supplied password
+        /// </summary>
+        /// <param name="password">The password to decrypt with</param>
+        /// <param name="input">The stream with unencrypted data</param>
+        /// <param name="output">The encrypted output stream</param>
+        public void EncryptStream(string password, Stream input, Stream output)
+        {
+            int a;
+            long encrypted_data_size = 0;
+            byte[] buffer = new byte[1024 * 4];
+            //SharpAESCrypt c = new SharpAESCrypt(password, output, OperationMode.Encrypt);
+            this.BeginEncrypt?.Invoke(new BeginEnryptEventArgs() { OriginalFileSize = input.Length });
+            while ((a = input.Read(buffer, 0, buffer.Length)) != 0)
+            {
+                this.Write(buffer, 0, a);
+                encrypted_data_size += a;
+                this.EncryptProgressReport?.Invoke(new EncryptProgressReportEventArgs(input.Length, encrypted_data_size, a));
+            }
+            this.FlushFinalBlock();
+        }
 
+        /// <summary>
+        /// Encrypts a file using the supplied password
+        /// </summary>
+        /// <param name="password">The password to encrypt with</param>
+        /// <param name="input">The file with unencrypted data</param>
+        /// <param name="output">The encrypted output file</param>
+        public void EncryptFile(string password,string inputfile, string outputfile)
+        {
+            using (FileStream infs = File.OpenRead(inputfile))
+            using (FileStream outfs = File.Create(outputfile))
+                EncryptStream(password, infs, outfs);
+        }
+
+
+
+        #endregion
+        /// <summary>
+        /// Encrypts a file using the supplied password
+        /// </summary>
+        /// <param name="password">The password to encrypt with</param>
+        /// <param name="input">The file with unencrypted data</param>
+        /// <param name="output">The encrypted output file</param>
+        public async System.Threading.Tasks.Task EncryptFileAsync(string inputfile)
+        {
+            await System.Threading.Tasks.Task.Run(() =>
+            {
+                int a;
+                long encrypted_data_size = 0;
+                byte[] buffer = new byte[1024 * 4];
+                using (FileStream infs = File.OpenRead(inputfile))
+                {
+                    this.BeginEncrypt?.Invoke(new BeginEnryptEventArgs() { OriginalFileSize = infs.Length });
+                    while ((a = infs.Read(buffer, 0, buffer.Length)) != 0)
+                    {
+                        this.Write(buffer, 0, a);
+                        encrypted_data_size += a;
+                        this.EncryptProgressReport?.Invoke(new EncryptProgressReportEventArgs(infs.Length, encrypted_data_size, a));
+                    }
+                    this.FlushFinalBlock();
+                }
+            });
+        }
         /// <summary>
         /// Main function, used when compiled as a standalone executable
         /// </summary>
@@ -1405,5 +1485,58 @@ namespace SharpAESCrypt
         }
 #endif
         #endregion
+    }
+
+    /// <summary>
+    /// 加密前回调参数
+    /// </summary>
+    public class BeginEnryptEventArgs : EventArgs
+    {
+        /// <summary>
+        /// 原始文件长度
+        /// </summary>
+        public long OriginalFileSize { get; set; }
+
+        public BeginEnryptEventArgs()
+        {
+
+        }
+
+        public BeginEnryptEventArgs(long originalFileSize)
+        {
+            OriginalFileSize = originalFileSize;
+        }
+    }
+
+    /// <summary>
+    /// 加密进度报告参数
+    /// </summary>
+    public class EncryptProgressReportEventArgs : EventArgs
+    {
+        /// <summary>
+        /// 原始文件长度
+        /// </summary>
+        public long OriginalFileSize { get; set; }
+
+        /// <summary>
+        /// 已加密的数据长度
+        /// </summary>
+        public long EncryptedDataSize { get; set; }
+
+        /// <summary>
+        /// 此次加密的数据长度
+        /// </summary>
+        public long EncryptedBlockSize { get; set; }
+
+        public EncryptProgressReportEventArgs()
+        {
+        }
+
+        public EncryptProgressReportEventArgs(long originalFileSize, long encryptedDataSize, long encryptedBlockSize)
+        {
+            OriginalFileSize = originalFileSize;
+            EncryptedDataSize = encryptedDataSize;
+            EncryptedBlockSize = encryptedBlockSize;
+        }
     }
 }
