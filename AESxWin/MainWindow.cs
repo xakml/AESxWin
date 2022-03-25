@@ -134,7 +134,7 @@ namespace AESxWin
                                 }
 
 
-                                await path.EncryptFileAsync(txtPassword.Text);
+                                //await path.EncryptFileAsync(txtPassword.Text);
                                 this.Log(path + " Encrypted.");
                                 count++;
 
@@ -154,7 +154,10 @@ namespace AESxWin
                         var followSubDirs = chkSubFolders.Checked ? true : false;
 
                         var allfiles = path.GetFolderFilesPaths(followSubDirs);
-
+                        this.progressEncryptAllFiles.Maximum = allfiles.Count();
+                        this.progressEncryptAllFiles.Minimum = 0;
+                        this.progressEncryptAllFiles.Value = 0;
+                        this.progressEncryptAllFiles.Step = 1;
                         foreach (var file in allfiles)
                         {
                             if (file.CheckExtension(lstExts.Text.ParseExtensions()))
@@ -163,7 +166,15 @@ namespace AESxWin
                                 {
                                     try
                                     {
-                                        await file.EncryptFileAsync(txtPassword.Text);
+                                        //await file.EncryptFileAsync(txtPassword.Text);
+                                        string outputfile = file + ".aes";
+                                        using (FileStream outfs = File.Create(outputfile))
+                                        {
+                                            var aes = new SharpAESCrypt.SharpAESCrypt(txtPassword.Text, outfs, SharpAESCrypt.OperationMode.Encrypt);
+                                            aes.BeginEncrypt += Aes_BeginEncrypt;
+                                            aes.EncryptProgressReport += Aes_EncryptProgressReport;
+                                            await aes.EncryptFileAsync(file);
+                                        }
                                         this.Log(file + " Encrypted.");
                                         count++;
 
@@ -181,6 +192,7 @@ namespace AESxWin
                                   //  this.Log(file + " Ignored.");
                                 }
                             }
+                            this.progressEncryptAllFiles.PerformStep();
                         }
 
 
@@ -328,6 +340,61 @@ namespace AESxWin
                 e.Effect = DragDropEffects.Copy;
             else
                 e.Effect = DragDropEffects.None;
+        }
+
+        private void GeneratePwd_Click(object sender, EventArgs e)
+        {
+           var pwd = new PasswordGenerator.Password(12).IncludeLowercase()
+                .IncludeNumeric()
+                .IncludeSpecial()
+                .IncludeUppercase().Next();
+            this.txtPassword.PasswordChar = '\0';
+            this.txtPassword.Text = pwd;
+            File.WriteAllText(Path.Combine(Application.StartupPath, "PWD-"+DateTime.Now.ToString("yyyyMMddHHmmss")), pwd);
+        }
+        int blockSize = -1; 
+        private void cmbBlockSizeList_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            var selectedBlockSize = this.cmbBlockSizeList.SelectedItem as string;
+            if (!string.IsNullOrEmpty(selectedBlockSize))
+            {
+                switch (selectedBlockSize)
+                {
+                    case "10M":
+                        blockSize = 1024 * 1024 * 10;
+                        break;
+                    case "50M":
+                        blockSize = 1024 * 1024 * 40;
+                        break;
+                    case "100M":
+                        blockSize = 1024 * 1024 * 100;
+                        break;
+                    case "200M":
+                        blockSize = 1024 * 1024 * 200;
+                        break;
+                    case "500M":
+                        blockSize = 1024 * 1024 * 500;
+                        break;
+                    case "自定义":
+                        {
+                            this.nudCustomBlockSize.Enabled = true;
+                        }
+                        break;
+                    default:
+                        break;
+                }
+
+                if (selectedBlockSize == "自定义")
+                {
+                    this.nudCustomBlockSize.Enabled = true;
+                    this.nudCustomBlockSize.Focus();
+                }
+                else
+                {
+                    if (this.nudCustomBlockSize.Enabled)
+                        this.nudCustomBlockSize.Enabled = false;
+                }
+            }
         }
     }
 }
