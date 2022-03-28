@@ -1341,6 +1341,7 @@ namespace SharpAESCrypt
                 m_hmac = null;
             }
         }
+        long encrypted_data_size = 0;
 
         /// <summary>
         /// Encrypts a stream using the supplied password
@@ -1351,17 +1352,26 @@ namespace SharpAESCrypt
         public void EncryptStream(string password, Stream input, Stream output)
         {
             int a;
-            long encrypted_data_size = 0;
             byte[] buffer = new byte[1024 * 4];
             //SharpAESCrypt c = new SharpAESCrypt(password, output, OperationMode.Encrypt);
             this.BeginEncrypt?.Invoke(new BeginEnryptEventArgs() { OriginalFileSize = input.Length });
+
+            System.Timers.Timer timer = new System.Timers.Timer();
+            timer.Interval = 500;
+            timer.Elapsed += Timer_Elapsed;
+            timer.Start();
             while ((a = input.Read(buffer, 0, buffer.Length)) != 0)
             {
                 this.Write(buffer, 0, a);
                 encrypted_data_size += a;
-                this.EncryptProgressReport?.Invoke(new EncryptProgressReportEventArgs(input.Length, encrypted_data_size, a));
             }
             this.FlushFinalBlock();
+            timer.Stop();
+        }
+
+        private void Timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            this.EncryptProgressReport?.Invoke(new EncryptProgressReportEventArgs() { EncryptedDataSize = encrypted_data_size  });
         }
 
         /// <summary>
@@ -1393,7 +1403,8 @@ namespace SharpAESCrypt
                 Stopwatch stopwatch = new Stopwatch();
                 stopwatch.Start();
                 int a;
-                long encrypted_data_size = 0;
+                //long encrypted_data_size = 0;
+                encrypted_data_size = 0;
                 int buffer_size = 1024 * 4;
                 byte[] buffer = new byte[buffer_size];
                 if (blockSize > 0)
@@ -1432,10 +1443,10 @@ namespace SharpAESCrypt
                 }
                 else
                 {
-                    //if (string.IsNullOrEmpty(output_filename))
-                    //{
-
-                    //}
+                    System.Timers.Timer timer = new System.Timers.Timer();
+                    timer.Interval = 500;
+                    timer.Elapsed += Timer_Elapsed;
+                    timer.Start();
                     using (FileStream infs = File.OpenRead(inputfile))
                     {
                         this.BeginEncrypt?.Invoke(new BeginEnryptEventArgs() { OriginalFileSize = infs.Length });
@@ -1443,9 +1454,10 @@ namespace SharpAESCrypt
                         {
                             this.Write(buffer, 0, a);
                             encrypted_data_size += a;
-                            this.EncryptProgressReport?.Invoke(new EncryptProgressReportEventArgs(infs.Length, encrypted_data_size, a));
+                            //this.EncryptProgressReport?.Invoke(new EncryptProgressReportEventArgs(infs.Length, encrypted_data_size, a));
                         }
                         this.FlushFinalBlock();
+                        timer.Stop();
                     }
                 }
                 stopwatch.Stop();

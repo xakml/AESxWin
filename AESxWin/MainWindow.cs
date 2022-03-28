@@ -141,7 +141,9 @@ namespace AESxWin
 
 
                                 //await path.EncryptFileAsync(txtPassword.Text);
-                                this.Log(path + " Encrypted.");
+                                this.Log(Path.GetFileName(path) + " Encrypted.");
+                                //this.Log(Xakml.Common.StringTools.Strings.SubMasked(Path.GetFileName(path), '*') + " Encrypted.");
+
                                 count++;
 
                                 if (chkDeleteOrg.Checked)
@@ -188,7 +190,7 @@ namespace AESxWin
                                             aes.EncryptOrDeEncryptCompleteReport += Aes_EncryptOrDeEncryptCompleteReport;
                                             await aes.EncryptFileAsync(file);
                                         }
-                                        this.Log(file + " Encrypted.");
+                                        this.Log (Xakml.Common.StringTools.Strings.SubMasked(file,'*')  + " Encrypted.");
                                         count++;
 
                                         if (chkDeleteOrg.Checked)
