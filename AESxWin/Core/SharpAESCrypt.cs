@@ -1341,7 +1341,6 @@ namespace SharpAESCrypt
                 m_hmac = null;
             }
         }
-        long encrypted_data_size = 0;
 
         /// <summary>
         /// Encrypts a stream using the supplied password
@@ -1357,7 +1356,7 @@ namespace SharpAESCrypt
             this.BeginEncrypt?.Invoke(new BeginEnryptEventArgs() { OriginalFileSize = input.Length });
 
             System.Timers.Timer timer = new System.Timers.Timer();
-            timer.Interval = 500;
+            timer.Interval = 1000;
             timer.Elapsed += Timer_Elapsed;
             timer.Start();
             while ((a = input.Read(buffer, 0, buffer.Length)) != 0)
@@ -1369,8 +1368,11 @@ namespace SharpAESCrypt
             timer.Stop();
         }
 
+        long encrypted_data_size = 0;
+        int elapsed_seconds = 0;
         private void Timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
+            elapsed_seconds++;
             this.EncryptProgressReport?.Invoke(new EncryptProgressReportEventArgs() { EncryptedDataSize = encrypted_data_size  });
         }
 
@@ -1444,7 +1446,7 @@ namespace SharpAESCrypt
                 else
                 {
                     System.Timers.Timer timer = new System.Timers.Timer();
-                    timer.Interval = 500;
+                    timer.Interval = 1000;
                     timer.Elapsed += Timer_Elapsed;
                     timer.Start();
                     using (FileStream infs = File.OpenRead(inputfile))

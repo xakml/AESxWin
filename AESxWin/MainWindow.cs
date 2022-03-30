@@ -242,7 +242,12 @@ namespace AESxWin
             {
                 this.Invoke(new Action(() =>
                 {
-                    this.progressEncrypt.Maximum = (int)obj.OriginalFileSize;
+                    long max_value = (long)obj.OriginalFileSize;
+                    if (max_value > int.MaxValue)
+                        this.progressEncrypt.Maximum = int.MaxValue;
+                    else
+                        this.progressEncrypt.Maximum = (int)max_value;
+
                     this.progressEncrypt.Minimum = 0;
                     this.progressEncrypt.Value = 0;
                     this.progressEncrypt.Visible = true;
