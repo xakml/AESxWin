@@ -128,7 +128,7 @@ namespace AESxWin
 
                                 //string outputfile = Path.Combine(folder,fileName + ".aes");
                                 //string outputfile = path + ".aes";
-                                string outputfile = Path.Combine(folder, Path.GetRandomFileName() + ".aes");
+                                string outputfile = Path.Combine(folder, Guid.NewGuid().ToString("N") + ".aes");
 
                                 using (FileStream outfs = File.Create(outputfile))
                                 {
@@ -421,6 +421,7 @@ namespace AESxWin
             this.txtPassword.Text = pwd;
             File.WriteAllText(Path.Combine(Application.StartupPath, "PWD-"+DateTime.Now.ToString("yyyyMMddHHmmss") + ".txt"), pwd);
         }
+
         int blockSize = -1; 
         private void cmbBlockSizeList_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -463,5 +464,144 @@ namespace AESxWin
                 }
             }
         }
+
+        private void chkSplit_CheckedChanged(object sender, EventArgs e)
+        {
+            if (this.chkSplit.Checked)
+            {
+                this.btnSplit.Enabled = true;
+                this.cmbBlockSizeList.Enabled = true;
+            }
+            else
+                this.cmbBlockSizeList.Enabled = false;
+
+        }
+
+        /// <summary>
+        /// split file
+        /// </summary>
+        /// <param name="original_file"></param>
+        /// <param name="perFileSize">output per file size</param>
+        private void SplitFile(string original_file, long perFileSize)
+        {
+            System.IO.FileInfo file = new System.IO.FileInfo(original_file);
+            if (file.Length < perFileSize)
+                return;
+            long splited_file_count = file.Length / perFileSize;
+            if (file.Length % perFileSize > 0)
+                splited_file_count += 1;
+
+            string original_file_name = System.IO.Path.GetFileNameWithoutExtension(original_file);
+            string original_file_extension = System.IO.Path.GetExtension(original_file);
+
+            string[] splied_files = new string[splited_file_count];
+            for (int i = 1; i <= splited_file_count; i++)
+            {
+                splied_files[i - 1] = $"{original_file_name}_{i}({splited_file_count}){original_file_extension}";
+            }
+
+            using (var streamReader = file.OpenRead())
+            {
+                int bytes_readed = 0;
+                int total_bytes_readed = 0;
+                int buffer_length = 1024 * 1024 * 1; //缓冲区1M
+                byte[] buffer = new byte[buffer_length];
+                foreach (string split_file_name in splied_files)
+                {
+                    using (System.IO.FileStream fs = new System.IO.FileStream(split_file_name, System.IO.FileMode.CreateNew,
+                        System.IO.FileAccess.Write))
+                    {
+                        do
+                        {
+                            if (buffer_length + total_bytes_readed > perFileSize)
+                            {
+                                var buffer1 = new byte[buffer_length - (buffer_length + total_bytes_readed - perFileSize)];
+                                bytes_readed = streamReader.Read(buffer1, 0, buffer1.Length);
+                                fs.Write(buffer1, 0, bytes_readed);
+                            }
+                            else
+                            {
+                                bytes_readed = streamReader.Read(buffer, 0, buffer_length);
+                                fs.Write(buffer, 0, bytes_readed);
+                            }
+                            total_bytes_readed += bytes_readed;
+
+                        } while ((total_bytes_readed < perFileSize) && bytes_readed > 0);
+                        fs.Flush();
+                        fs.Close();
+                    }
+                    total_bytes_readed = 0;
+                }
+            }
+        }
+
+        private long GetSplitedPerFileSize()
+        {
+            long blockSize = 1024 * 1024 * 100;
+            string seleted_block_size = this.cmbBlockSizeList.SelectedItem as string;
+            switch (seleted_block_size)
+            {
+                case "10M":
+                    blockSize = 1024 * 1024 * 10;
+                    break;
+                case "50M":
+                    blockSize = 1024 * 1024 * 50;
+                    break;
+                case "100M":
+                    blockSize = 1024 * 1024 * 100;
+                    break;
+                case "200M":
+                    blockSize = 1024 * 1024 * 200;
+                    break;
+                case "500M":
+                    blockSize = 1024 * 1024 * 500;
+                    break;
+                case "自定义":
+                    blockSize = 1024 * 1024 * (int)this.nudCustomBlockSize.Value;
+                    break;
+            }
+            return blockSize;
+        }
+        private void Split_Click(object sender, EventArgs e)
+        {
+            if (!this.chkSplit.Checked)
+                return;
+
+            var count = 0;
+            var paths = lstPaths.Items;
+
+            this.Log("Encryption Started.");
+            this.lblSpeed.Text = string.Empty;
+            if (paths != null && paths.Count > 0)
+            {
+                foreach (string path in paths)
+                {
+                    if (File.Exists(path))
+                    {
+
+                        if (path.CheckExtension(lstExts.Text.ParseExtensions()))
+                        {
+                            this.btnSplit.Enabled = false;
+
+                            long perFileSize = GetSplitedPerFileSize();
+                            System.Threading.Tasks.Task.Run(()=> this.SplitFile(path, perFileSize))
+                                .ContinueWith(tsk=> 
+                                {
+                                    this.Invoke(new Action(()=> 
+                                    {
+                                        this.btnSplit.Enabled = true;
+                                    }));
+                                });
+                        }
+                    }
+                    if (Directory.Exists(path))
+                    {
+
+                    }
+                }
+            }
+        }
+
+
     }
 }

@@ -56,6 +56,8 @@
             this.nudCustomBlockSize = new System.Windows.Forms.NumericUpDown();
             this.label2 = new System.Windows.Forms.Label();
             this.lblSpeed = new System.Windows.Forms.Label();
+            this.chkSplit = new System.Windows.Forms.CheckBox();
+            this.btnSplit = new System.Windows.Forms.Button();
             this.gbPaths.SuspendLayout();
             this.gbOptions.SuspendLayout();
             this.gbPassword.SuspendLayout();
@@ -237,9 +239,9 @@
             // btnEncrypt
             // 
             this.btnEncrypt.Font = new System.Drawing.Font("Tahoma", 8F, System.Drawing.FontStyle.Bold);
-            this.btnEncrypt.Location = new System.Drawing.Point(12, 333);
+            this.btnEncrypt.Location = new System.Drawing.Point(9, 332);
             this.btnEncrypt.Name = "btnEncrypt";
-            this.btnEncrypt.Size = new System.Drawing.Size(163, 38);
+            this.btnEncrypt.Size = new System.Drawing.Size(90, 40);
             this.btnEncrypt.TabIndex = 3;
             this.btnEncrypt.Text = "Encrypt";
             this.btnEncrypt.UseVisualStyleBackColor = true;
@@ -248,9 +250,9 @@
             // btnDecrypt
             // 
             this.btnDecrypt.Font = new System.Drawing.Font("Tahoma", 8F, System.Drawing.FontStyle.Bold);
-            this.btnDecrypt.Location = new System.Drawing.Point(397, 332);
+            this.btnDecrypt.Location = new System.Drawing.Point(460, 332);
             this.btnDecrypt.Name = "btnDecrypt";
-            this.btnDecrypt.Size = new System.Drawing.Size(163, 38);
+            this.btnDecrypt.Size = new System.Drawing.Size(90, 40);
             this.btnDecrypt.TabIndex = 4;
             this.btnDecrypt.Text = "Decrypt";
             this.btnDecrypt.UseVisualStyleBackColor = true;
@@ -313,6 +315,8 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.btnSplit);
+            this.groupBox1.Controls.Add(this.chkSplit);
             this.groupBox1.Controls.Add(this.label3);
             this.groupBox1.Controls.Add(this.cmbBlockSizeList);
             this.groupBox1.Controls.Add(this.nudCustomBlockSize);
@@ -368,7 +372,7 @@
             this.nudCustomBlockSize.Size = new System.Drawing.Size(77, 21);
             this.nudCustomBlockSize.TabIndex = 1;
             this.nudCustomBlockSize.Value = new decimal(new int[] {
-            5,
+            100,
             0,
             0,
             0});
@@ -390,6 +394,29 @@
             this.lblSpeed.Size = new System.Drawing.Size(41, 12);
             this.lblSpeed.TabIndex = 10;
             this.lblSpeed.Text = "label4";
+            // 
+            // chkSplit
+            // 
+            this.chkSplit.AutoSize = true;
+            this.chkSplit.Font = new System.Drawing.Font("宋体", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.chkSplit.Location = new System.Drawing.Point(375, 27);
+            this.chkSplit.Name = "chkSplit";
+            this.chkSplit.Size = new System.Drawing.Size(61, 18);
+            this.chkSplit.TabIndex = 4;
+            this.chkSplit.Text = "Split";
+            this.chkSplit.UseVisualStyleBackColor = true;
+            this.chkSplit.CheckedChanged += new System.EventHandler(this.chkSplit_CheckedChanged);
+            // 
+            // btnSplit
+            // 
+            this.btnSplit.Font = new System.Drawing.Font("Tahoma", 8F, System.Drawing.FontStyle.Bold);
+            this.btnSplit.Location = new System.Drawing.Point(448, 15);
+            this.btnSplit.Name = "btnSplit";
+            this.btnSplit.Size = new System.Drawing.Size(90, 40);
+            this.btnSplit.TabIndex = 11;
+            this.btnSplit.Text = "Split";
+            this.btnSplit.UseVisualStyleBackColor = true;
+            this.btnSplit.Click += new System.EventHandler(this.Split_Click);
             // 
             // MainWindow
             // 
@@ -458,6 +485,8 @@
         private System.Windows.Forms.NumericUpDown nudCustomBlockSize;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label lblSpeed;
+        private System.Windows.Forms.CheckBox chkSplit;
+        private System.Windows.Forms.Button btnSplit;
     }
 }
 
