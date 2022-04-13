@@ -51,13 +51,13 @@
             this.progressEncrypt = new System.Windows.Forms.ProgressBar();
             this.progressEncryptAllFiles = new System.Windows.Forms.ProgressBar();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.btnSplit = new System.Windows.Forms.Button();
+            this.chkSplit = new System.Windows.Forms.CheckBox();
             this.label3 = new System.Windows.Forms.Label();
             this.cmbBlockSizeList = new System.Windows.Forms.ComboBox();
             this.nudCustomBlockSize = new System.Windows.Forms.NumericUpDown();
             this.label2 = new System.Windows.Forms.Label();
             this.lblSpeed = new System.Windows.Forms.Label();
-            this.chkSplit = new System.Windows.Forms.CheckBox();
-            this.btnSplit = new System.Windows.Forms.Button();
             this.gbPaths.SuspendLayout();
             this.gbOptions.SuspendLayout();
             this.gbPassword.SuspendLayout();
@@ -272,7 +272,8 @@
             // 
             // gbLog
             // 
-            this.gbLog.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.gbLog.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.gbLog.Controls.Add(this.txtLog);
             this.gbLog.Location = new System.Drawing.Point(6, 373);
@@ -327,6 +328,29 @@
             this.groupBox1.TabIndex = 9;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Split options";
+            // 
+            // btnSplit
+            // 
+            this.btnSplit.Font = new System.Drawing.Font("Tahoma", 8F, System.Drawing.FontStyle.Bold);
+            this.btnSplit.Location = new System.Drawing.Point(448, 15);
+            this.btnSplit.Name = "btnSplit";
+            this.btnSplit.Size = new System.Drawing.Size(90, 40);
+            this.btnSplit.TabIndex = 11;
+            this.btnSplit.Text = "Split";
+            this.btnSplit.UseVisualStyleBackColor = true;
+            this.btnSplit.Click += new System.EventHandler(this.Split_Click);
+            // 
+            // chkSplit
+            // 
+            this.chkSplit.AutoSize = true;
+            this.chkSplit.Font = new System.Drawing.Font("宋体", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.chkSplit.Location = new System.Drawing.Point(375, 27);
+            this.chkSplit.Name = "chkSplit";
+            this.chkSplit.Size = new System.Drawing.Size(61, 18);
+            this.chkSplit.TabIndex = 4;
+            this.chkSplit.Text = "Split";
+            this.chkSplit.UseVisualStyleBackColor = true;
+            this.chkSplit.CheckedChanged += new System.EventHandler(this.chkSplit_CheckedChanged);
             // 
             // label3
             // 
@@ -394,29 +418,6 @@
             this.lblSpeed.Size = new System.Drawing.Size(41, 12);
             this.lblSpeed.TabIndex = 10;
             this.lblSpeed.Text = "label4";
-            // 
-            // chkSplit
-            // 
-            this.chkSplit.AutoSize = true;
-            this.chkSplit.Font = new System.Drawing.Font("宋体", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.chkSplit.Location = new System.Drawing.Point(375, 27);
-            this.chkSplit.Name = "chkSplit";
-            this.chkSplit.Size = new System.Drawing.Size(61, 18);
-            this.chkSplit.TabIndex = 4;
-            this.chkSplit.Text = "Split";
-            this.chkSplit.UseVisualStyleBackColor = true;
-            this.chkSplit.CheckedChanged += new System.EventHandler(this.chkSplit_CheckedChanged);
-            // 
-            // btnSplit
-            // 
-            this.btnSplit.Font = new System.Drawing.Font("Tahoma", 8F, System.Drawing.FontStyle.Bold);
-            this.btnSplit.Location = new System.Drawing.Point(448, 15);
-            this.btnSplit.Name = "btnSplit";
-            this.btnSplit.Size = new System.Drawing.Size(90, 40);
-            this.btnSplit.TabIndex = 11;
-            this.btnSplit.Text = "Split";
-            this.btnSplit.UseVisualStyleBackColor = true;
-            this.btnSplit.Click += new System.EventHandler(this.Split_Click);
             // 
             // MainWindow
             // 
