@@ -531,10 +531,28 @@ namespace AESxWin
                         fs.Close();
                     }
                     total_bytes_readed = 0;
+                    this.Invoke(new Action(() => { this.progressEncrypt.PerformStep(); }));
                 }
             }
         }
 
+        /// <summary>
+        /// compute the count of split result
+        /// </summary>
+        /// <param name="original_file">original file</param>
+        /// <param name="perFileSize">result per file size（unit:byte)</param>
+        /// <returns></returns>
+        private int TrySplitFile(string original_file, long perFileSize)
+        {
+            System.IO.FileInfo file = new System.IO.FileInfo(original_file);
+            if (file.Length < perFileSize)
+                return 1;
+            long splited_file_count = file.Length / perFileSize;
+            if (file.Length % perFileSize > 0)
+                splited_file_count += 1;
+
+            return (int)splited_file_count;
+        }
         private long GetSplitedPerFileSize()
         {
             long blockSize = 1024 * 1024 * 100;
@@ -562,6 +580,7 @@ namespace AESxWin
             }
             return blockSize;
         }
+
         private void Split_Click(object sender, EventArgs e)
         {
             if (!this.chkSplit.Checked)
@@ -569,8 +588,9 @@ namespace AESxWin
 
             var count = 0;
             var paths = lstPaths.Items;
+            //progressEncrypt;
 
-            this.Log("Encryption Started.");
+            this.Log("split Started.");
             this.lblSpeed.Text = string.Empty;
             if (paths != null && paths.Count > 0)
             {
@@ -582,14 +602,22 @@ namespace AESxWin
                         if (path.CheckExtension(lstExts.Text.ParseExtensions()))
                         {
                             this.btnSplit.Enabled = false;
-
                             long perFileSize = GetSplitedPerFileSize();
+
+                            int splitedFileCount = TrySplitFile(path, perFileSize);
+                            this.progressEncrypt.Maximum = splitedFileCount;
+                            this.progressEncrypt.Value = 0;
+                            this.progressEncrypt.Step = 1;
+                            this.progressEncrypt.Visible = true;
+
                             System.Threading.Tasks.Task.Run(()=> this.SplitFile(path, perFileSize))
                                 .ContinueWith(tsk=> 
                                 {
                                     this.Invoke(new Action(()=> 
                                     {
+                                        MessageBox.Show("Split complete ！");
                                         this.btnSplit.Enabled = true;
+                                        this.progressEncrypt.Visible = false;
                                     }));
                                 });
                         }
