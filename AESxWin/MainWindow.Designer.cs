@@ -58,6 +58,10 @@
             this.nudCustomBlockSize = new System.Windows.Forms.NumericUpDown();
             this.label2 = new System.Windows.Forms.Label();
             this.lblSpeed = new System.Windows.Forms.Label();
+            this.label4 = new System.Windows.Forms.Label();
+            this.txtOutputFolder = new System.Windows.Forms.TextBox();
+            this.btnSelectFolder = new System.Windows.Forms.Button();
+            this.chkUseMd5ValueAsOutputFileName = new System.Windows.Forms.CheckBox();
             this.gbPaths.SuspendLayout();
             this.gbOptions.SuspendLayout();
             this.gbPassword.SuspendLayout();
@@ -70,13 +74,16 @@
             // 
             this.gbPaths.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.gbPaths.Controls.Add(this.btnSelectFolder);
+            this.gbPaths.Controls.Add(this.txtOutputFolder);
+            this.gbPaths.Controls.Add(this.label4);
             this.gbPaths.Controls.Add(this.btnRemovePath);
             this.gbPaths.Controls.Add(this.btnAddFolder);
             this.gbPaths.Controls.Add(this.btnAddFile);
             this.gbPaths.Controls.Add(this.lstPaths);
             this.gbPaths.Location = new System.Drawing.Point(12, 11);
             this.gbPaths.Name = "gbPaths";
-            this.gbPaths.Size = new System.Drawing.Size(544, 120);
+            this.gbPaths.Size = new System.Drawing.Size(743, 181);
             this.gbPaths.TabIndex = 0;
             this.gbPaths.TabStop = false;
             this.gbPaths.Text = "Paths";
@@ -121,7 +128,7 @@
             this.lstPaths.ItemHeight = 12;
             this.lstPaths.Location = new System.Drawing.Point(6, 18);
             this.lstPaths.Name = "lstPaths";
-            this.lstPaths.Size = new System.Drawing.Size(532, 64);
+            this.lstPaths.Size = new System.Drawing.Size(731, 64);
             this.lstPaths.TabIndex = 0;
             this.lstPaths.DragDrop += new System.Windows.Forms.DragEventHandler(this.lstPaths_DragDrop);
             this.lstPaths.DragEnter += new System.Windows.Forms.DragEventHandler(this.lstPaths_DragEnter);
@@ -130,14 +137,15 @@
             // 
             this.gbOptions.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.gbOptions.Controls.Add(this.chkUseMd5ValueAsOutputFileName);
             this.gbOptions.Controls.Add(this.chkIgnoreEncryptedFiles);
             this.gbOptions.Controls.Add(this.label1);
             this.gbOptions.Controls.Add(this.lstExts);
             this.gbOptions.Controls.Add(this.chkSubFolders);
             this.gbOptions.Controls.Add(this.chkDeleteOrg);
-            this.gbOptions.Location = new System.Drawing.Point(12, 137);
+            this.gbOptions.Location = new System.Drawing.Point(12, 198);
             this.gbOptions.Name = "gbOptions";
-            this.gbOptions.Size = new System.Drawing.Size(544, 64);
+            this.gbOptions.Size = new System.Drawing.Size(743, 64);
             this.gbOptions.TabIndex = 1;
             this.gbOptions.TabStop = false;
             this.gbOptions.Text = "Options";
@@ -206,9 +214,9 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.gbPassword.Controls.Add(this.btnGeneratePwd);
             this.gbPassword.Controls.Add(this.txtPassword);
-            this.gbPassword.Location = new System.Drawing.Point(12, 283);
+            this.gbPassword.Location = new System.Drawing.Point(12, 344);
             this.gbPassword.Name = "gbPassword";
-            this.gbPassword.Size = new System.Drawing.Size(548, 44);
+            this.gbPassword.Size = new System.Drawing.Size(747, 44);
             this.gbPassword.TabIndex = 2;
             this.gbPassword.TabStop = false;
             this.gbPassword.Text = "Password";
@@ -216,7 +224,7 @@
             // btnGeneratePwd
             // 
             this.btnGeneratePwd.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnGeneratePwd.Location = new System.Drawing.Point(521, 16);
+            this.btnGeneratePwd.Location = new System.Drawing.Point(720, 16);
             this.btnGeneratePwd.Name = "btnGeneratePwd";
             this.btnGeneratePwd.Size = new System.Drawing.Size(27, 27);
             this.btnGeneratePwd.TabIndex = 1;
@@ -232,14 +240,14 @@
             this.txtPassword.Location = new System.Drawing.Point(3, 16);
             this.txtPassword.Name = "txtPassword";
             this.txtPassword.PasswordChar = '*';
-            this.txtPassword.Size = new System.Drawing.Size(512, 27);
+            this.txtPassword.Size = new System.Drawing.Size(711, 27);
             this.txtPassword.TabIndex = 0;
             this.txtPassword.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // btnEncrypt
             // 
             this.btnEncrypt.Font = new System.Drawing.Font("Tahoma", 8F, System.Drawing.FontStyle.Bold);
-            this.btnEncrypt.Location = new System.Drawing.Point(9, 332);
+            this.btnEncrypt.Location = new System.Drawing.Point(9, 393);
             this.btnEncrypt.Name = "btnEncrypt";
             this.btnEncrypt.Size = new System.Drawing.Size(90, 40);
             this.btnEncrypt.TabIndex = 3;
@@ -249,8 +257,9 @@
             // 
             // btnDecrypt
             // 
+            this.btnDecrypt.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnDecrypt.Font = new System.Drawing.Font("Tahoma", 8F, System.Drawing.FontStyle.Bold);
-            this.btnDecrypt.Location = new System.Drawing.Point(460, 332);
+            this.btnDecrypt.Location = new System.Drawing.Point(665, 408);
             this.btnDecrypt.Name = "btnDecrypt";
             this.btnDecrypt.Size = new System.Drawing.Size(90, 40);
             this.btnDecrypt.TabIndex = 4;
@@ -262,9 +271,9 @@
             // 
             this.lblInfo.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.lblInfo.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
-            this.lblInfo.Location = new System.Drawing.Point(0, 513);
+            this.lblInfo.Location = new System.Drawing.Point(0, 703);
             this.lblInfo.Name = "lblInfo";
-            this.lblInfo.Size = new System.Drawing.Size(572, 18);
+            this.lblInfo.Size = new System.Drawing.Size(771, 18);
             this.lblInfo.TabIndex = 5;
             this.lblInfo.Text = "by : Eslam Hamouda (@EslaMx7) - www.eslamx.com";
             this.lblInfo.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -276,9 +285,9 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.gbLog.Controls.Add(this.txtLog);
-            this.gbLog.Location = new System.Drawing.Point(6, 373);
+            this.gbLog.Location = new System.Drawing.Point(6, 474);
             this.gbLog.Name = "gbLog";
-            this.gbLog.Size = new System.Drawing.Size(550, 106);
+            this.gbLog.Size = new System.Drawing.Size(749, 195);
             this.gbLog.TabIndex = 6;
             this.gbLog.TabStop = false;
             this.gbLog.Text = "Log";
@@ -292,39 +301,41 @@
             this.txtLog.Name = "txtLog";
             this.txtLog.ReadOnly = true;
             this.txtLog.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.txtLog.Size = new System.Drawing.Size(544, 86);
+            this.txtLog.Size = new System.Drawing.Size(743, 175);
             this.txtLog.TabIndex = 0;
             this.txtLog.WordWrap = false;
             // 
             // progressEncrypt
             // 
             this.progressEncrypt.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.progressEncrypt.Location = new System.Drawing.Point(0, 488);
+            this.progressEncrypt.Location = new System.Drawing.Point(0, 678);
             this.progressEncrypt.Name = "progressEncrypt";
-            this.progressEncrypt.Size = new System.Drawing.Size(572, 10);
+            this.progressEncrypt.Size = new System.Drawing.Size(771, 10);
             this.progressEncrypt.TabIndex = 7;
             this.progressEncrypt.Visible = false;
             // 
             // progressEncryptAllFiles
             // 
             this.progressEncryptAllFiles.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.progressEncryptAllFiles.Location = new System.Drawing.Point(0, 498);
+            this.progressEncryptAllFiles.Location = new System.Drawing.Point(0, 688);
             this.progressEncryptAllFiles.Name = "progressEncryptAllFiles";
-            this.progressEncryptAllFiles.Size = new System.Drawing.Size(572, 15);
+            this.progressEncryptAllFiles.Size = new System.Drawing.Size(771, 15);
             this.progressEncryptAllFiles.TabIndex = 8;
             this.progressEncryptAllFiles.Visible = false;
             // 
             // groupBox1
             // 
+            this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox1.Controls.Add(this.btnSplit);
             this.groupBox1.Controls.Add(this.chkSplit);
             this.groupBox1.Controls.Add(this.label3);
             this.groupBox1.Controls.Add(this.cmbBlockSizeList);
             this.groupBox1.Controls.Add(this.nudCustomBlockSize);
             this.groupBox1.Controls.Add(this.label2);
-            this.groupBox1.Location = new System.Drawing.Point(12, 215);
+            this.groupBox1.Location = new System.Drawing.Point(12, 276);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(544, 65);
+            this.groupBox1.Size = new System.Drawing.Size(743, 65);
             this.groupBox1.TabIndex = 9;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Split options";
@@ -413,18 +424,54 @@
             // lblSpeed
             // 
             this.lblSpeed.AutoSize = true;
-            this.lblSpeed.Location = new System.Drawing.Point(231, 347);
+            this.lblSpeed.Location = new System.Drawing.Point(231, 408);
             this.lblSpeed.Name = "lblSpeed";
             this.lblSpeed.Size = new System.Drawing.Size(41, 12);
             this.lblSpeed.TabIndex = 10;
             this.lblSpeed.Text = "label4";
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(6, 133);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(83, 12);
+            this.label4.TabIndex = 4;
+            this.label4.Text = "output folder";
+            // 
+            // txtOutputFolder
+            // 
+            this.txtOutputFolder.Location = new System.Drawing.Point(88, 130);
+            this.txtOutputFolder.Name = "txtOutputFolder";
+            this.txtOutputFolder.Size = new System.Drawing.Size(398, 21);
+            this.txtOutputFolder.TabIndex = 5;
+            // 
+            // btnSelectFolder
+            // 
+            this.btnSelectFolder.Location = new System.Drawing.Point(492, 128);
+            this.btnSelectFolder.Name = "btnSelectFolder";
+            this.btnSelectFolder.Size = new System.Drawing.Size(46, 23);
+            this.btnSelectFolder.TabIndex = 6;
+            this.btnSelectFolder.Text = "...";
+            this.btnSelectFolder.UseVisualStyleBackColor = true;
+            this.btnSelectFolder.Click += new System.EventHandler(this.btnSelectFolder_Click);
+            // 
+            // chkUseMd5ValueAsOutputFileName
+            // 
+            this.chkUseMd5ValueAsOutputFileName.AutoSize = true;
+            this.chkUseMd5ValueAsOutputFileName.Location = new System.Drawing.Point(433, 18);
+            this.chkUseMd5ValueAsOutputFileName.Name = "chkUseMd5ValueAsOutputFileName";
+            this.chkUseMd5ValueAsOutputFileName.Size = new System.Drawing.Size(312, 16);
+            this.chkUseMd5ValueAsOutputFileName.TabIndex = 5;
+            this.chkUseMd5ValueAsOutputFileName.Text = "&Use original file hash value as output file name";
+            this.chkUseMd5ValueAsOutputFileName.UseVisualStyleBackColor = true;
             // 
             // MainWindow
             // 
             this.AllowDrop = true;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(572, 531);
+            this.ClientSize = new System.Drawing.Size(771, 721);
             this.Controls.Add(this.lblSpeed);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.progressEncrypt);
@@ -443,6 +490,7 @@
             this.Text = "AESxWin";
             this.Load += new System.EventHandler(this.MainWindow_Load);
             this.gbPaths.ResumeLayout(false);
+            this.gbPaths.PerformLayout();
             this.gbOptions.ResumeLayout(false);
             this.gbOptions.PerformLayout();
             this.gbPassword.ResumeLayout(false);
@@ -488,6 +536,10 @@
         private System.Windows.Forms.Label lblSpeed;
         private System.Windows.Forms.CheckBox chkSplit;
         private System.Windows.Forms.Button btnSplit;
+        private System.Windows.Forms.TextBox txtOutputFolder;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Button btnSelectFolder;
+        private System.Windows.Forms.CheckBox chkUseMd5ValueAsOutputFileName;
     }
 }
 

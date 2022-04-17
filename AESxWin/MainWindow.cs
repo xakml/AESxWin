@@ -113,6 +113,7 @@ namespace AESxWin
             if (paths != null && paths.Count > 0)
             {
                 this.btnEncrypt.Enabled = false;
+               var md5Helper =new Xakml.Common.Toolkit.MD5Helper();
                 foreach (string path in paths)
                 {
                     if (File.Exists(path)) // Is File 
@@ -128,7 +129,8 @@ namespace AESxWin
 
                                 //string outputfile = Path.Combine(folder,fileName + ".aes");
                                 //string outputfile = path + ".aes";
-                                string outputfile = Path.Combine(folder, Guid.NewGuid().ToString("N") + ".aes");
+                                string original_file_hash_value = md5Helper.GetMD5HexOfFile(path);
+                                string outputfile = Path.Combine(folder, original_file_hash_value + ".aes");
 
                                 using (FileStream outfs = File.Create(outputfile))
                                 {
@@ -180,8 +182,9 @@ namespace AESxWin
 
                                         //await file.EncryptFileAsync(txtPassword.Text);
                                         //string outputfile = file + ".aes";
+                                        string original_file_hash_value = md5Helper.GetMD5HexOfFile(file);
 
-                                        string outputfile = Path.Combine(folder, Path.GetRandomFileName() + ".aes");
+                                        string outputfile = Path.Combine(folder, original_file_hash_value + ".aes");
                                         using (FileStream outfs = File.Create(outputfile))
                                         {
                                             var aes = new SharpAESCrypt.SharpAESCrypt(txtPassword.Text, outfs, extension_header, SharpAESCrypt.OperationMode.Encrypt);
@@ -630,6 +633,19 @@ namespace AESxWin
             }
         }
 
-
+        private void btnSelectFolder_Click(object sender, EventArgs e)
+        {
+            using (var folderDialog = new FolderBrowserDialog())
+            {
+                folderDialog.Description = "Select A Folder to output";
+                folderDialog.ShowNewFolderButton = true;
+                folderDialog.RootFolder = Environment.SpecialFolder.MyComputer;
+                if (folderDialog.ShowDialog() == DialogResult.OK)
+                {
+                    var folderPath = folderDialog.SelectedPath;
+                    this.txtOutputFolder.Text = folderPath;
+                }
+            }
+        }
     }
 }

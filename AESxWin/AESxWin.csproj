@@ -55,6 +55,9 @@
     <Reference Include="Xakml.Common.StringTools, Version=1.0.0.1, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Xakml.Common.StringTools.1.0.0.1\lib\netstandard2.0\Xakml.Common.StringTools.dll</HintPath>
     </Reference>
+    <Reference Include="Xakml.Common.Toolkit, Version=1.0.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Xakml.Common.Toolkit.1.0.3\lib\netstandard2.0\Xakml.Common.Toolkit.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Helpers\FilesHelper.cs" />
