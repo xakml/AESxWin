@@ -49,7 +49,7 @@
             this.gbLog = new System.Windows.Forms.GroupBox();
             this.txtLog = new System.Windows.Forms.TextBox();
             this.progressEncrypt = new System.Windows.Forms.ProgressBar();
-            this.progressEncryptAllFiles = new System.Windows.Forms.ProgressBar();
+            this.progressEncryptAllFiles = new ProgressAll();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.btnSplit = new System.Windows.Forms.Button();
             this.chkSplit = new System.Windows.Forms.CheckBox();
@@ -526,7 +526,7 @@
         private System.Windows.Forms.TextBox txtLog;
         private System.Windows.Forms.Button btnGeneratePwd;
         private System.Windows.Forms.ProgressBar progressEncrypt;
-        private System.Windows.Forms.ProgressBar progressEncryptAllFiles;
+        private ProgressAll progressEncryptAllFiles;
         private System.Windows.Forms.CheckBox chkIgnoreEncryptedFiles;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.Label label2;

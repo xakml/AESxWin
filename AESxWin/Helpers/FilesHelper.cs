@@ -60,7 +60,7 @@ namespace AESxWin.Helpers
         }
 
 
-        public static IEnumerable<string> GetFolderFilesPaths(this string folder, bool followSubDirs = true)
+        public static List<string> GetFolderFilesPaths(this string folder, bool followSubDirs = true)
         {
             var paths = new List<string>();
             if (!Directory.Exists(folder))

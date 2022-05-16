@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace AESxWin
@@ -81,25 +82,43 @@ namespace AESxWin
 
         private void btnAddFolder_Click(object sender, EventArgs e)
         {
-            using (var folderDialog = new FolderBrowserDialog())
+            //using (var folderDialog = new FolderBrowserDialog())
+            //{
+            //    folderDialog.Description = "Select A Folder";
+            //    folderDialog.ShowNewFolderButton = true;
+            //    //folderDialog.RootFolder = Environment.SpecialFolder.MyComputer;
+            //    if (folderDialog.ShowDialog() == DialogResult.OK)
+            //    {
+            //        var folderPath = folderDialog.SelectedPath;
+            //        if (!String.IsNullOrEmpty(folderPath))
+            //        {
+            //            var items = lstPaths.Items;
+            //            if (!items.Contains(folderPath))
+            //                lstPaths.Items.Add(folderPath);
+            //            else
+            //                this.Log(folderPath + " is already exist in the list.");
+            //        }
+            //    }
+            //}
+
+            Microsoft.WindowsAPICodePack.Dialogs.CommonOpenFileDialog OpenDlg = new Microsoft.WindowsAPICodePack.Dialogs.CommonOpenFileDialog();
+
+            OpenDlg.IsFolderPicker = true;
+            //OpenDlg.Filters.Add(new Microsoft.WindowsAPICodePack.Dialogs.CommonFileDialogFilter("项目文件", "*.auproj")); // = "项目文件|*.auproj";
+            OpenDlg.Title = "选择目录";
+            OpenDlg.Multiselect = false;
+            //OpenDlg.InitialDirectory = GlobalSettings.ProjectsFolder;
+            if (OpenDlg.ShowDialog() == Microsoft.WindowsAPICodePack.Dialogs.CommonFileDialogResult.Ok)
             {
-                folderDialog.Description = "Select A Folder";
-                folderDialog.ShowNewFolderButton = true;
-                folderDialog.RootFolder = Environment.SpecialFolder.MyComputer;
-                if (folderDialog.ShowDialog() == DialogResult.OK)
+                var folderPath = OpenDlg.FileName;
+                if (!String.IsNullOrEmpty(folderPath))
                 {
-                    var folderPath = folderDialog.SelectedPath;
-                    if (!String.IsNullOrEmpty(folderPath))
-                    {
-                        var items = lstPaths.Items;
-                        if (!items.Contains(folderPath))
-                            lstPaths.Items.Add(folderPath);
-                        else
-                            this.Log(folderPath + " is already exist in the list.");
-                    }
+                    var items = lstPaths.Items;
+                    if (!items.Contains(folderPath))
+                        lstPaths.Items.Add(folderPath);
+                    else
+                        this.Log(folderPath + " is already exist in the list.");
                 }
-
-
             }
         }
 
@@ -160,6 +179,8 @@ namespace AESxWin
                     }
                     if (Directory.Exists(path)) // Is Folder
                     {
+                       await EncryptDirectory(path, txtPassword.Text);
+                        /**
                         var followSubDirs = chkSubFolders.Checked ? true : false;
 
                         var allfiles = path.GetFolderFilesPaths(followSubDirs);
@@ -205,15 +226,10 @@ namespace AESxWin
                                         this.Log(file + " " + ex.Message);
                                     }
                                 }
-                                else
-                                {
-                                    //  this.Log(file + " Ignored.");
-                                }
                             }
                             this.progressEncryptAllFiles.PerformStep();
                         }
-
-
+                        **/
                     }
                 }
             }
@@ -320,8 +336,8 @@ namespace AESxWin
                                     {
                                         var filename_extension = aes.Extensions.First(ext => ext.Key.Equals(ORIGINAL_FILENAME));
                                         var original_file_name = SharpAESCrypt.SharpAESCrypt.DecryptStringData(this.txtPassword.Text, filename_extension.Value);
-                                        string target_fileName = Path.Combine(folder, original_file_name);
-                                        File.Move(outputfile, target_fileName);
+                                        string target_fileName = Path.Combine(folder, Path.GetFileName(original_file_name));
+                                        File.Move(outputfile, target_fileName); //TODO:可能出现同名文件
                                     }
                                 }
                             }
@@ -646,6 +662,79 @@ namespace AESxWin
                     this.txtOutputFolder.Text = folderPath;
                 }
             }
+        }
+
+        private static readonly object locker = new object();
+             
+        private void progressEncryptAllFilesPerformStep()
+        {
+            lock (locker)
+            {
+                if (this.InvokeRequired)
+                    this.Invoke(new Action(this.progressEncryptAllFiles.PerformStep));
+                else
+                    this.progressEncryptAllFiles.PerformStep();
+            }
+        }
+
+        Xakml.Common.Toolkit.MD5Helper md5Helper = new Xakml.Common.Toolkit.MD5Helper();
+
+        /// <summary>
+        /// 加密文件（单个文件）
+        /// </summary>
+        /// <param name="file_fullname"></param>
+        private async Task EncryptFile(string file_fullname,string password)
+        {
+            var file_extension = Path.GetExtension(file_fullname);
+            var file_name = Path.GetFileName(file_fullname);
+            if (file_extension.Equals(".aes", StringComparison.CurrentCultureIgnoreCase))
+            {
+                return;
+            }
+
+            var fileName_data = SharpAESCrypt.SharpAESCrypt.EncryptStringData(password, file_name);
+            KeyValuePair<string, byte[]> extension_header = new KeyValuePair<string, byte[]>(ORIGINAL_FILENAME, fileName_data);
+
+            string folder = Path.GetDirectoryName(file_fullname);
+
+            //compute hash value of file
+            string original_file_hash_value = md5Helper.GetMD5HexOfFile(file_fullname);
+            string outputfile = Path.Combine(folder, original_file_hash_value + ".aes");
+            using (FileStream outfs = File.Create(outputfile))
+            {
+                var aes = new SharpAESCrypt.SharpAESCrypt(txtPassword.Text, outfs, extension_header, SharpAESCrypt.OperationMode.Encrypt);
+                //aes.BeginEncrypt += Aes_BeginEncrypt;
+                //aes.EncryptProgressReport += Aes_EncryptProgressReport;
+                //aes.EncryptOrDeEncryptCompleteReport += Aes_EncryptOrDeEncryptCompleteReport;
+                await aes.EncryptFileAsync(file_fullname);
+                this.Log(Path.GetFileName(file_fullname) + " Encrypted.");
+            }
+        }
+
+        /// <summary>
+        /// 加密文件夹（多个文件）
+        /// </summary>
+        /// <param name="directoryName"></param>
+        private async Task EncryptDirectory(string directoryName,string password)
+        {
+            var followSubDirs = chkSubFolders.Checked ? true : false;
+            var allfiles = directoryName.GetFolderFilesPaths(followSubDirs);
+            this.progressEncryptAllFiles.Maximum = allfiles.Count();
+            this.progressEncryptAllFiles.Minimum = 0;
+            this.progressEncryptAllFiles.Value = 0;
+            this.progressEncryptAllFiles.Step = 1;
+            this.progressEncryptAllFiles.Visible = true;// = 1;
+
+           await Task.Run(() =>
+            {
+                Parallel.For(0, allfiles.Count,
+               new ParallelOptions() { MaxDegreeOfParallelism = Environment.ProcessorCount - 1 },
+               async i =>
+               {
+                   await EncryptFile(allfiles[i], password);
+                   this.progressEncryptAllFilesPerformStep();
+               });
+            });
         }
     }
 }
