@@ -736,5 +736,10 @@ namespace AESxWin
                });
             });
         }
+
+        private void llblClearOutput_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            this.txtLog.Clear();
+        }
     }
 }
