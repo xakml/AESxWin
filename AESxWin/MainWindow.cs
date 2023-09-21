@@ -737,6 +737,11 @@ namespace AESxWin
             });
         }
 
+        private void llblClearOutput_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            this.txtLog.Clear();
+        }
+
         private void btnHdTest_Click(object sender, EventArgs e)
         {
             FrmDiskRMTest test = new FrmDiskRMTest();

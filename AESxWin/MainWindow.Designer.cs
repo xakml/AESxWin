@@ -62,6 +62,7 @@
             this.label2 = new System.Windows.Forms.Label();
             this.lblSpeed = new System.Windows.Forms.Label();
             this.progressEncryptAllFiles = new AESxWin.ProgressAll();
+            this.llblClearOutput = new System.Windows.Forms.LinkLabel();
             this.btnHdTest = new System.Windows.Forms.Button();
             this.gbPaths.SuspendLayout();
             this.gbOptions.SuspendLayout();
@@ -472,8 +473,17 @@
             this.progressEncryptAllFiles.Value = 0;
             this.progressEncryptAllFiles.Visible = false;
             // 
+            // llblClearOutput
             // btnHdTest
             // 
+            this.llblClearOutput.AutoSize = true;
+            this.llblClearOutput.Location = new System.Drawing.Point(72, 459);
+            this.llblClearOutput.Name = "llblClearOutput";
+            this.llblClearOutput.Size = new System.Drawing.Size(53, 12);
+            this.llblClearOutput.TabIndex = 11;
+            this.llblClearOutput.TabStop = true;
+            this.llblClearOutput.Text = "清除输出";
+            this.llblClearOutput.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.llblClearOutput_LinkClicked);
             this.btnHdTest.Location = new System.Drawing.Point(523, 87);
             this.btnHdTest.Name = "btnHdTest";
             this.btnHdTest.Size = new System.Drawing.Size(75, 23);
@@ -488,6 +498,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(771, 721);
+            this.Controls.Add(this.llblClearOutput);
             this.Controls.Add(this.lblSpeed);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.progressEncrypt);
@@ -503,7 +514,7 @@
             this.MaximizeBox = false;
             this.Name = "MainWindow";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "AESxWin";
+            this.Text = "AESxWin(v1.0.0)";
             this.Load += new System.EventHandler(this.MainWindow_Load);
             this.gbPaths.ResumeLayout(false);
             this.gbPaths.PerformLayout();
@@ -556,6 +567,7 @@
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Button btnSelectFolder;
         private System.Windows.Forms.CheckBox chkUseMd5ValueAsOutputFileName;
+        private System.Windows.Forms.LinkLabel llblClearOutput;
         private System.Windows.Forms.Button btnHdTest;
     }
 }
