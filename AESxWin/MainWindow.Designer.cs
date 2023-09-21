@@ -30,11 +30,15 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainWindow));
             this.gbPaths = new System.Windows.Forms.GroupBox();
+            this.btnSelectFolder = new System.Windows.Forms.Button();
+            this.txtOutputFolder = new System.Windows.Forms.TextBox();
+            this.label4 = new System.Windows.Forms.Label();
             this.btnRemovePath = new System.Windows.Forms.Button();
             this.btnAddFolder = new System.Windows.Forms.Button();
             this.btnAddFile = new System.Windows.Forms.Button();
             this.lstPaths = new System.Windows.Forms.ListBox();
             this.gbOptions = new System.Windows.Forms.GroupBox();
+            this.chkUseMd5ValueAsOutputFileName = new System.Windows.Forms.CheckBox();
             this.chkIgnoreEncryptedFiles = new System.Windows.Forms.CheckBox();
             this.label1 = new System.Windows.Forms.Label();
             this.lstExts = new System.Windows.Forms.ComboBox();
@@ -49,7 +53,6 @@
             this.gbLog = new System.Windows.Forms.GroupBox();
             this.txtLog = new System.Windows.Forms.TextBox();
             this.progressEncrypt = new System.Windows.Forms.ProgressBar();
-            this.progressEncryptAllFiles = new ProgressAll();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.btnSplit = new System.Windows.Forms.Button();
             this.chkSplit = new System.Windows.Forms.CheckBox();
@@ -58,10 +61,8 @@
             this.nudCustomBlockSize = new System.Windows.Forms.NumericUpDown();
             this.label2 = new System.Windows.Forms.Label();
             this.lblSpeed = new System.Windows.Forms.Label();
-            this.label4 = new System.Windows.Forms.Label();
-            this.txtOutputFolder = new System.Windows.Forms.TextBox();
-            this.btnSelectFolder = new System.Windows.Forms.Button();
-            this.chkUseMd5ValueAsOutputFileName = new System.Windows.Forms.CheckBox();
+            this.progressEncryptAllFiles = new AESxWin.ProgressAll();
+            this.btnHdTest = new System.Windows.Forms.Button();
             this.gbPaths.SuspendLayout();
             this.gbOptions.SuspendLayout();
             this.gbPassword.SuspendLayout();
@@ -74,6 +75,7 @@
             // 
             this.gbPaths.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.gbPaths.Controls.Add(this.btnHdTest);
             this.gbPaths.Controls.Add(this.btnSelectFolder);
             this.gbPaths.Controls.Add(this.txtOutputFolder);
             this.gbPaths.Controls.Add(this.label4);
@@ -87,6 +89,32 @@
             this.gbPaths.TabIndex = 0;
             this.gbPaths.TabStop = false;
             this.gbPaths.Text = "Paths";
+            // 
+            // btnSelectFolder
+            // 
+            this.btnSelectFolder.Location = new System.Drawing.Point(492, 128);
+            this.btnSelectFolder.Name = "btnSelectFolder";
+            this.btnSelectFolder.Size = new System.Drawing.Size(46, 23);
+            this.btnSelectFolder.TabIndex = 6;
+            this.btnSelectFolder.Text = "...";
+            this.btnSelectFolder.UseVisualStyleBackColor = true;
+            this.btnSelectFolder.Click += new System.EventHandler(this.btnSelectFolder_Click);
+            // 
+            // txtOutputFolder
+            // 
+            this.txtOutputFolder.Location = new System.Drawing.Point(88, 130);
+            this.txtOutputFolder.Name = "txtOutputFolder";
+            this.txtOutputFolder.Size = new System.Drawing.Size(398, 21);
+            this.txtOutputFolder.TabIndex = 5;
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(6, 133);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(83, 12);
+            this.label4.TabIndex = 4;
+            this.label4.Text = "output folder";
             // 
             // btnRemovePath
             // 
@@ -149,6 +177,16 @@
             this.gbOptions.TabIndex = 1;
             this.gbOptions.TabStop = false;
             this.gbOptions.Text = "Options";
+            // 
+            // chkUseMd5ValueAsOutputFileName
+            // 
+            this.chkUseMd5ValueAsOutputFileName.AutoSize = true;
+            this.chkUseMd5ValueAsOutputFileName.Location = new System.Drawing.Point(433, 18);
+            this.chkUseMd5ValueAsOutputFileName.Name = "chkUseMd5ValueAsOutputFileName";
+            this.chkUseMd5ValueAsOutputFileName.Size = new System.Drawing.Size(312, 16);
+            this.chkUseMd5ValueAsOutputFileName.TabIndex = 5;
+            this.chkUseMd5ValueAsOutputFileName.Text = "&Use original file hash value as output file name";
+            this.chkUseMd5ValueAsOutputFileName.UseVisualStyleBackColor = true;
             // 
             // chkIgnoreEncryptedFiles
             // 
@@ -314,15 +352,6 @@
             this.progressEncrypt.TabIndex = 7;
             this.progressEncrypt.Visible = false;
             // 
-            // progressEncryptAllFiles
-            // 
-            this.progressEncryptAllFiles.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.progressEncryptAllFiles.Location = new System.Drawing.Point(0, 688);
-            this.progressEncryptAllFiles.Name = "progressEncryptAllFiles";
-            this.progressEncryptAllFiles.Size = new System.Drawing.Size(771, 15);
-            this.progressEncryptAllFiles.TabIndex = 8;
-            this.progressEncryptAllFiles.Visible = false;
-            // 
             // groupBox1
             // 
             this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
@@ -430,41 +459,28 @@
             this.lblSpeed.TabIndex = 10;
             this.lblSpeed.Text = "label4";
             // 
-            // label4
+            // progressEncryptAllFiles
             // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(6, 133);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(83, 12);
-            this.label4.TabIndex = 4;
-            this.label4.Text = "output folder";
+            this.progressEncryptAllFiles.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.progressEncryptAllFiles.Location = new System.Drawing.Point(0, 688);
+            this.progressEncryptAllFiles.Maximum = 100;
+            this.progressEncryptAllFiles.Minimum = 0;
+            this.progressEncryptAllFiles.Name = "progressEncryptAllFiles";
+            this.progressEncryptAllFiles.Size = new System.Drawing.Size(771, 15);
+            this.progressEncryptAllFiles.Step = 10;
+            this.progressEncryptAllFiles.TabIndex = 8;
+            this.progressEncryptAllFiles.Value = 0;
+            this.progressEncryptAllFiles.Visible = false;
             // 
-            // txtOutputFolder
+            // btnHdTest
             // 
-            this.txtOutputFolder.Location = new System.Drawing.Point(88, 130);
-            this.txtOutputFolder.Name = "txtOutputFolder";
-            this.txtOutputFolder.Size = new System.Drawing.Size(398, 21);
-            this.txtOutputFolder.TabIndex = 5;
-            // 
-            // btnSelectFolder
-            // 
-            this.btnSelectFolder.Location = new System.Drawing.Point(492, 128);
-            this.btnSelectFolder.Name = "btnSelectFolder";
-            this.btnSelectFolder.Size = new System.Drawing.Size(46, 23);
-            this.btnSelectFolder.TabIndex = 6;
-            this.btnSelectFolder.Text = "...";
-            this.btnSelectFolder.UseVisualStyleBackColor = true;
-            this.btnSelectFolder.Click += new System.EventHandler(this.btnSelectFolder_Click);
-            // 
-            // chkUseMd5ValueAsOutputFileName
-            // 
-            this.chkUseMd5ValueAsOutputFileName.AutoSize = true;
-            this.chkUseMd5ValueAsOutputFileName.Location = new System.Drawing.Point(433, 18);
-            this.chkUseMd5ValueAsOutputFileName.Name = "chkUseMd5ValueAsOutputFileName";
-            this.chkUseMd5ValueAsOutputFileName.Size = new System.Drawing.Size(312, 16);
-            this.chkUseMd5ValueAsOutputFileName.TabIndex = 5;
-            this.chkUseMd5ValueAsOutputFileName.Text = "&Use original file hash value as output file name";
-            this.chkUseMd5ValueAsOutputFileName.UseVisualStyleBackColor = true;
+            this.btnHdTest.Location = new System.Drawing.Point(523, 87);
+            this.btnHdTest.Name = "btnHdTest";
+            this.btnHdTest.Size = new System.Drawing.Size(75, 23);
+            this.btnHdTest.TabIndex = 7;
+            this.btnHdTest.Text = "HD TEST";
+            this.btnHdTest.UseVisualStyleBackColor = true;
+            this.btnHdTest.Click += new System.EventHandler(this.btnHdTest_Click);
             // 
             // MainWindow
             // 
@@ -540,6 +556,7 @@
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Button btnSelectFolder;
         private System.Windows.Forms.CheckBox chkUseMd5ValueAsOutputFileName;
+        private System.Windows.Forms.Button btnHdTest;
     }
 }
 

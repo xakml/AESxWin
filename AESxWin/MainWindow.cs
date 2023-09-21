@@ -736,5 +736,11 @@ namespace AESxWin
                });
             });
         }
+
+        private void btnHdTest_Click(object sender, EventArgs e)
+        {
+            FrmDiskRMTest test = new FrmDiskRMTest();
+            test.ShowDialog();
+        }
     }
 }
