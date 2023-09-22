@@ -21,16 +21,23 @@ namespace AESxWin
 
         private void btnStartTest_Click(object sender, EventArgs e)
         {
+            this.progressBar1.Style = ProgressBarStyle.Marquee;
+            this.btnStartTest.Enabled = false;
             Task.Run(() =>
             {
-               return CreateRandomFile(1024 * 1024 * 50);
+               return CreateRandomFile(1024 * 1024 * 1024);
             }).ContinueWith(tsk => 
             {
                 if(tsk.IsCompleted)
                 {
                     this.Invoke(new Action(async () =>
                     {
-                        MessageBox.Show("测试写入速度: " + (await tsk) / (1024 * 1024) );
+                        this.progressBar1.Style = ProgressBarStyle.Continuous;
+                        this.progressBar1.Value = 0;
+                        var result = await tsk;
+                        var writeSpeed = result.WriteDataSize / result.ElapsedSeconds;
+                        this.btnStartTest.Enabled = true;
+                        MessageBox.Show("测试写入速度: " + writeSpeed / (1024 * 1024) + "\r\n耗时：" + result.ElapsedSeconds + "秒");
                     }));
                 }
             });
@@ -40,7 +47,7 @@ namespace AESxWin
         /// </summary>
         /// <param name="fileSize">文件大小（单位：字节）</param>
         /// <param name="targetFileName">生成的目标文件保存位置</param>
-        private double CreateRandomFile(long fileSize, string targetFileName = "")
+        private WriteTestResult CreateRandomFile(long fileSize, string targetFileName = "")
         {
             //参考代码： https://github.com/kakhovsky/BigFileZIP/blob/master/bigfiletest/BigFileCompression/Program.cs
 
@@ -95,14 +102,27 @@ namespace AESxWin
                     }
                 }
                 stopwatch.Stop();
-                var writeSpeed = fileSize / stopwatch.Elapsed.TotalSeconds;
-                return writeSpeed;
+                //var writeSpeed = fileSize / stopwatch.Elapsed.TotalSeconds;
+
+                return new WriteTestResult() { ElapsedSeconds = stopwatch.Elapsed.TotalSeconds, WriteDataSize = fileSize };
             }
             catch (Exception ex)
             {
                 throw ex;
             }
-            return -1;
+        }
+
+        internal class WriteTestResult
+        {
+            /// <summary>
+            /// 写入数据的长度（字节单位）
+            /// </summary>
+            public long WriteDataSize { get; set; }
+
+            /// <summary>
+            /// 耗费的时间
+            /// </summary>
+            public double ElapsedSeconds { get; set; }
         }
     }
 }

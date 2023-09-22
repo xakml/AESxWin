@@ -354,8 +354,6 @@ namespace AESxWin
                             if (File.Exists(path.RemoveExtension()))
                                 File.Delete(path.RemoveExtension());
                         }
-
-
                     }
                     if (Directory.Exists(path)) // Is Folder
                     {
@@ -392,11 +390,7 @@ namespace AESxWin
                                // this.Log(file + " Ignored.");
                             }
                         }
-
-
                     }
-
-
                 }
             }
 

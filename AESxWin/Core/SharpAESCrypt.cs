@@ -953,16 +953,19 @@ namespace SharpAESCrypt
         /// <param name="output">The encrypted output stream</param>
         public static void Encrypt(string password, Stream input, Stream output)
         {
-            int a;
+            int src_data_ReadedCount;
             long encrypted_data_size = 0;
-            byte[] buffer = new byte[1024 * 4];
+            int buffer_len = 1024 * 4;
+            int report_len = buffer_len * 10;
+            byte[] buffer = new byte[buffer_len];
             SharpAESCrypt c = new SharpAESCrypt(password, output, OperationMode.Encrypt);
             c.BeginEncrypt?.Invoke(new BeginEnryptEventArgs() { OriginalFileSize = input.Length });
-            while ((a = input.Read(buffer, 0, buffer.Length)) != 0)
+            while ((src_data_ReadedCount = input.Read(buffer, 0, buffer.Length)) != 0)
             {
-                c.Write(buffer, 0, a);
-                encrypted_data_size += a;
-                c.EncryptProgressReport?.Invoke(new EncryptProgressReportEventArgs(input.Length, encrypted_data_size, a));
+                c.Write(buffer, 0, src_data_ReadedCount);
+                encrypted_data_size += src_data_ReadedCount;
+                if (encrypted_data_size % report_len == 0)
+                    c.EncryptProgressReport?.Invoke(new EncryptProgressReportEventArgs(input.Length, encrypted_data_size, src_data_ReadedCount));
             }
             c.FlushFinalBlock();
         }
