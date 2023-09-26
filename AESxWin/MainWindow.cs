@@ -32,54 +32,33 @@ namespace AESxWin
 
         }
 
+        //Loading
         private void MainWindow_Load(object sender, EventArgs e)
         {
             lstExts.SelectedIndex = 6;
             this.lblSpeed.Text = string.Empty;
         }
 
+        #region 添加文件 , 文件夹
+        //添加文件
         private void btnAddFile_Click(object sender, EventArgs e)
         {
-            using (var fileDialog = new OpenFileDialog())
+            var files = new Tools().ShowOpenFileDialog();
+
+            if (files != null && files.Length > 0)
             {
-                fileDialog.Title = "Select your File(s)";
-                fileDialog.CheckFileExists = true;
-                fileDialog.CheckPathExists = true;
-                fileDialog.Multiselect = true;
-                fileDialog.SupportMultiDottedExtensions = true;
-                fileDialog.InitialDirectory = Application.StartupPath;
-
-                if (fileDialog.ShowDialog() == DialogResult.OK)
+                foreach (var filePath in files)
                 {
-                    var files = fileDialog.FileNames;
-
-                    if (files != null && files.Length > 0)
-                    {
-                        foreach (var filePath in files)
-                        {
-                            var items = lstPaths.Items;
-                            if (!items.Contains(filePath))
-                                lstPaths.Items.Add(filePath);
-                            else
-                                this.Log(filePath + " is already exist in the list.");
-                        }
-                    }
+                    var items = lstPaths.Items;
+                    if (!items.Contains(filePath))
+                        lstPaths.Items.Add(filePath);
+                    else
+                        this.Log(filePath + " is already exist in the list.");
                 }
             }
         }
 
-        private void btnRemovePath_Click(object sender, EventArgs e)
-        {
-            var selectedIndex = lstPaths.SelectedIndex;
-            if (selectedIndex != -1)
-            {
-                lstPaths.Items.RemoveAt(selectedIndex);
-
-                lstPaths.SelectedIndex = selectedIndex < lstPaths.Items.Count ? selectedIndex : selectedIndex - 1;
-                lstPaths.Focus();
-            }
-        }
-
+        //添加文件夹
         private void btnAddFolder_Click(object sender, EventArgs e)
         {
             //using (var folderDialog = new FolderBrowserDialog())
@@ -121,17 +100,39 @@ namespace AESxWin
                 }
             }
         }
+        #endregion
 
+        private void btnRemovePath_Click(object sender, EventArgs e)
+        {
+            var selectedIndex = lstPaths.SelectedIndex;
+            if (selectedIndex != -1)
+            {
+                lstPaths.Items.RemoveAt(selectedIndex);
+
+                lstPaths.SelectedIndex = selectedIndex < lstPaths.Items.Count ? selectedIndex : selectedIndex - 1;
+                lstPaths.Focus();
+            }
+        }
+
+        #region 加解密
+        //Encrypt
         private async void btnEncrypt_Click(object sender, EventArgs e)
         {
             var count = 0;
             var paths = lstPaths.Items;
+
+            if (this.txtPassword.Text.Length == 0)
+            {
+                this.Log("password is required for encrypt model.");
+                return;
+            }
 
             this.Log("Encryption Started.");
             this.lblSpeed.Text = string.Empty;
             if (paths != null && paths.Count > 0)
             {
                 this.btnEncrypt.Enabled = false;
+                this.btnDecrypt.Enabled = false;
                var md5Helper =new Xakml.Common.Toolkit.MD5Helper();
                 foreach (string path in paths)
                 {
@@ -148,9 +149,18 @@ namespace AESxWin
 
                                 //string outputfile = Path.Combine(folder,fileName + ".aes");
                                 //string outputfile = path + ".aes";
-                                string original_file_hash_value = md5Helper.GetMD5HexOfFile(path);
+                                this.Log("正在计算文件校验和,请稍后...");
+                                string original_file_hash_value = await Task.Run(() => 
+                                {
+                                    var stopwatch_hash = System.Diagnostics.Stopwatch.StartNew();
+                                    string hashString = md5Helper.GetMD5HexOfFile(path);
+                                    stopwatch_hash.Stop();
+                                    this.Log("文件校验和耗时:" + stopwatch_hash.Elapsed);
+                                    return hashString;
+                                });
                                 string outputfile = Path.Combine(folder, original_file_hash_value + ".aes");
-
+                                if (File.Exists(outputfile))
+                                    outputfile = Xakml.Common.StringTools.Strings.GetNextFileName(folder, original_file_hash_value, "aes");
                                 using (FileStream outfs = File.Create(outputfile))
                                 {
                                     var aes = new SharpAESCrypt.SharpAESCrypt(txtPassword.Text, outfs, extension_header, SharpAESCrypt.OperationMode.Encrypt);
@@ -159,10 +169,8 @@ namespace AESxWin
                                     aes.EncryptOrDeEncryptCompleteReport += Aes_EncryptOrDeEncryptCompleteReport;
                                     await aes.EncryptFileAsync(path);
                                 }
-
-
                                 //await path.EncryptFileAsync(txtPassword.Text);
-                                this.Log(Path.GetFileName(path) + " Encrypted.");
+                                this.Log(Path.GetFileName(path) + " Encrypted." + outputfile);
                                 //this.Log(Xakml.Common.StringTools.Strings.SubMasked(Path.GetFileName(path), '*') + " Encrypted.");
 
                                 count++;
@@ -237,16 +245,124 @@ namespace AESxWin
             this.Log($"Finished : {count} File(s) Encrypted.");
             if (!this.btnEncrypt.Enabled)
                 this.btnEncrypt.Enabled = true;
+            if(!this.btnDecrypt.Enabled)
+                this.btnDecrypt.Enabled = true;
         }
 
+        //Dencrypt
+        private async void btnDecrypt_Click(object sender, EventArgs e)
+        {
+            var count = 0;
+            var paths = lstPaths.Items;
+
+            this.Log("Decryption Started.");
+            this.lblSpeed.Text = string.Empty;
+            if (paths.Count > 0)
+            {
+                this.btnDecrypt.Enabled = false;
+                foreach (string path in paths)
+                {
+
+                    if (File.Exists(path) && path.EndsWith(".aes")) // Is Encrypted File 
+                    {
+                        try
+                        {
+                            var folder = Path.GetDirectoryName(path);
+
+                            var outputfile = path.RemoveExtension();
+
+                            using (FileStream infs = File.OpenRead(path))
+                            {
+                                var aes = new SharpAESCrypt.SharpAESCrypt(txtPassword.Text, infs, SharpAESCrypt.OperationMode.Decrypt);
+                                aes.BeginEncrypt += Aes_BeginEncrypt;
+                                aes.EncryptProgressReport += Aes_EncryptProgressReport;
+                                aes.EncryptOrDeEncryptCompleteReport += Aes_EncryptOrDeEncryptCompleteReport;
+                                await aes.DecryptFileAsync(outputfile);
+                                if (null != aes.Extensions && aes.Extensions.Count > 0)
+                                {
+                                    foreach (var item in aes.Extensions)
+                                    {
+                                        Console.WriteLine(item.Key + " ----> " + System.Text.Encoding.UTF8.GetString(item.Value));
+                                    }
+
+                                    if (aes.Extensions.Any(ext => ext.Key.Equals(ORIGINAL_FILENAME)))
+                                    {
+                                        var filename_extension = aes.Extensions.First(ext => ext.Key.Equals(ORIGINAL_FILENAME));
+                                        var original_file_name = SharpAESCrypt.SharpAESCrypt.DecryptStringData(this.txtPassword.Text, filename_extension.Value);
+                                        string target_fileName = Path.Combine(folder, Path.GetFileName(original_file_name));
+                                        File.Move(outputfile, target_fileName); //TODO:可能出现同名文件
+                                    }
+                                }
+                            }
+                            //await path.DecryptFileAsync(txtPassword.Text);
+                            this.Log(path + " Decrypted. " + outputfile);
+                            
+                            count++;
+
+                            if (chkDeleteOrg.Checked)
+                                File.Delete(path);
+                        }
+                        catch (Exception ex)
+                        {
+                            this.Log(path + " " + ex.Message);
+                            if (File.Exists(path.RemoveExtension()))
+                                File.Delete(path.RemoveExtension());
+                        }
+                    }
+                    if (Directory.Exists(path)) // Is Folder
+                    {
+                        var followSubDirs = chkSubFolders.Checked ? true : false;
+
+                        var allfiles = path.GetFolderFilesPaths(followSubDirs);
+
+                        foreach (var file in allfiles)
+                        {
+                            if (file.RemoveExtension().CheckExtension(lstExts.Text.ParseExtensions()))
+                            {
+                                if (file.EndsWith(".aes"))
+                                {
+                                    try
+                                    {
+                                        await file.DecryptFileAsync(txtPassword.Text);
+                                        this.Log(file + " Decrypted.");
+                                        count++;
+
+                                        if (chkDeleteOrg.Checked)
+                                            File.Delete(file);
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        this.Log(file + " " + ex.Message);
+                                        if (File.Exists(file.RemoveExtension()))
+                                            File.Delete(file.RemoveExtension());
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                // this.Log(file + " Ignored.");
+                            }
+                        }
+                    }
+                }
+            }
+
+            this.Log($"Finished : {count} File(s) Decrypted.");
+            if (!this.btnDecrypt.Enabled)
+                this.btnDecrypt.Enabled = true;
+        }
+        #endregion
+
+        #region 加解密进度事件
         private void Aes_EncryptProgressReport(SharpAESCrypt.EncryptProgressReportEventArgs obj)
         {
             if (this.InvokeRequired)
             {
                 this.Invoke(new Action(()=> 
                 {
-                if (obj.EncryptedDataSize > this.progressEncrypt.Maximum) return;
-                this.progressEncrypt.Value = (int)obj.EncryptedDataSize;
+                    if (obj.EncryptedDataSize <= this.progressEncrypt.Maximum)
+                        this.progressEncrypt.Value = (int)obj.EncryptedDataSize;
+                    this.lblSpeed.Text = obj.EncryptSpeed; //$"{obj.EncryptedDataSize}/{obj.OriginalFileSize}";
                 }));
             }
             else
@@ -286,7 +402,8 @@ namespace AESxWin
             {
                 this.Invoke(new Action(() =>
                 {
-                    this.lblSpeed.Text = obj.WriteSpeedReadable;
+                    this.lblSpeed.Text = $"处理速度:{obj.WriteSpeedReadable}, 耗时: {obj.Elapsed}";
+                    
                     this.progressEncrypt.Visible = false;
                     this.progressEncryptAllFiles.Visible = false;
                 }));
@@ -296,108 +413,7 @@ namespace AESxWin
                 Aes_EncryptOrDeEncryptCompleteReport(obj);
             }
         }
-
-        private async void btnDecrypt_Click(object sender, EventArgs e)
-        {
-            var count = 0;
-            var paths = lstPaths.Items;
-
-            this.Log("Decryption Started.");
-            this.lblSpeed.Text = string.Empty;
-            if (paths.Count > 0)
-            {
-                this.btnDecrypt.Enabled = false;
-                foreach (string path in paths)
-                {
-
-                    if (File.Exists(path) && path.EndsWith(".aes")) // Is Encrypted File 
-                    {
-                        try
-                        {
-                            var folder = Path.GetDirectoryName(path);
-
-                            var outputfile = path.RemoveExtension();
-
-                            using (FileStream infs = File.OpenRead(path))
-                            {
-                                var aes = new SharpAESCrypt.SharpAESCrypt(txtPassword.Text, infs, SharpAESCrypt.OperationMode.Decrypt);
-                                aes.BeginEncrypt += Aes_BeginEncrypt;
-                                aes.EncryptProgressReport += Aes_EncryptProgressReport;
-                                aes.EncryptOrDeEncryptCompleteReport += Aes_EncryptOrDeEncryptCompleteReport;
-                                await aes.DecryptFileAsync(outputfile);
-                                if(null != aes.Extensions && aes.Extensions.Count > 0)
-                                {
-                                    foreach (var item in aes.Extensions)
-                                    {
-                                        Console.WriteLine(item.Key + " ----> " +  System.Text.Encoding.UTF8.GetString(item.Value));
-                                    }
-
-                                    if (aes.Extensions.Any(ext => ext.Key.Equals(ORIGINAL_FILENAME)))
-                                    {
-                                        var filename_extension = aes.Extensions.First(ext => ext.Key.Equals(ORIGINAL_FILENAME));
-                                        var original_file_name = SharpAESCrypt.SharpAESCrypt.DecryptStringData(this.txtPassword.Text, filename_extension.Value);
-                                        string target_fileName = Path.Combine(folder, Path.GetFileName(original_file_name));
-                                        File.Move(outputfile, target_fileName); //TODO:可能出现同名文件
-                                    }
-                                }
-                            }
-                            //await path.DecryptFileAsync(txtPassword.Text);
-                            this.Log(path + " Decrypted.");
-                            count++;
-
-                            if (chkDeleteOrg.Checked)
-                                File.Delete(path);
-                        }
-                        catch (Exception ex)
-                        {
-                            this.Log(path + " " + ex.Message);
-                            if (File.Exists(path.RemoveExtension()))
-                                File.Delete(path.RemoveExtension());
-                        }
-                    }
-                    if (Directory.Exists(path)) // Is Folder
-                    {
-                        var followSubDirs = chkSubFolders.Checked ? true : false;
-
-                        var allfiles = path.GetFolderFilesPaths(followSubDirs);
-
-                        foreach (var file in allfiles)
-                        {
-                            if (file.RemoveExtension().CheckExtension(lstExts.Text.ParseExtensions()))
-                            {
-                                if (file.EndsWith(".aes"))
-                                {
-                                    try
-                                    {
-                                        await file.DecryptFileAsync(txtPassword.Text);
-                                        this.Log(file + " Decrypted.");
-                                        count++;
-
-                                        if (chkDeleteOrg.Checked)
-                                            File.Delete(file);
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        this.Log(file + " " + ex.Message);
-                                        if(File.Exists(file.RemoveExtension()))
-                                            File.Delete(file.RemoveExtension());
-                                    }
-                                }
-
-                            }
-                            else
-                            {
-                               // this.Log(file + " Ignored.");
-                            }
-                        }
-                    }
-                }
-            }
-
-            this.Log($"Finished : {count} File(s) Decrypted.");
-            if (!this.btnDecrypt.Enabled)
-                this.btnDecrypt.Enabled = true;
-        }
+        #endregion
 
         private void lblInfo_Click(object sender, EventArgs e)
         {
@@ -478,6 +494,7 @@ namespace AESxWin
             }
         }
 
+        #region 拆分文件
         private void chkSplit_CheckedChanged(object sender, EventArgs e)
         {
             if (this.chkSplit.Checked)
@@ -642,6 +659,7 @@ namespace AESxWin
                 }
             }
         }
+        #endregion
 
         private void btnSelectFolder_Click(object sender, EventArgs e)
         {
@@ -671,6 +689,7 @@ namespace AESxWin
             }
         }
 
+        #region 加密文件,文件夹
         Xakml.Common.Toolkit.MD5Helper md5Helper = new Xakml.Common.Toolkit.MD5Helper();
 
         /// <summary>
@@ -730,6 +749,7 @@ namespace AESxWin
                });
             });
         }
+        #endregion
 
         private void llblClearOutput_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {

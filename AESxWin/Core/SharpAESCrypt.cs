@@ -1072,7 +1072,7 @@ namespace SharpAESCrypt
             //Basic input checks
             if (stream == null)
                 throw new ArgumentNullException("stream");
-            if (password == null)
+            if (password == null || password.Length == 0)
                 throw new ArgumentNullException("password");
             if (mode != OperationMode.Encrypt && mode != OperationMode.Decrypt)
                 throw new ArgumentException(Strings.InvalidOperationMode, "mode");
@@ -1372,11 +1372,17 @@ namespace SharpAESCrypt
         }
 
         long encrypted_data_size = 0;
-        int elapsed_seconds = 0;
+        long original_file_len_encrypt_async = 0;
+        int elapsed_seconds_encrypt_async = 0; //异步加密进度报告事件
         private void Timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
-            elapsed_seconds++;
-            this.EncryptProgressReport?.Invoke(new EncryptProgressReportEventArgs() { EncryptedDataSize = encrypted_data_size  });
+            elapsed_seconds_encrypt_async++;
+            this.EncryptProgressReport?.Invoke(new EncryptProgressReportEventArgs()
+            {
+                EncryptedDataSize = encrypted_data_size,
+                OriginalFileSize = original_file_len_encrypt_async,
+                ElapsedSeconds = elapsed_seconds_encrypt_async
+            });
         }
 
         /// <summary>
@@ -1411,6 +1417,7 @@ namespace SharpAESCrypt
                 //long encrypted_data_size = 0;
                 encrypted_data_size = 0;
                 int buffer_size = 1024 * 4;
+                //int report_len = buffer_size * 10;
                 byte[] buffer = new byte[buffer_size];
                 if (blockSize > 0)
                 {
@@ -1452,7 +1459,9 @@ namespace SharpAESCrypt
                     timer.Interval = 1000;
                     timer.Elapsed += Timer_Elapsed;
                     timer.Start();
-                    using (FileStream infs = File.OpenRead(inputfile))
+                    FileInfo fileInfo = new FileInfo(inputfile);
+                    original_file_len_encrypt_async = fileInfo.Length;
+                    using (FileStream infs = fileInfo.OpenRead())
                     {
                         this.BeginEncrypt?.Invoke(new BeginEnryptEventArgs() { OriginalFileSize = infs.Length });
                         while ((a = infs.Read(buffer, 0, buffer.Length)) != 0)
@@ -1684,9 +1693,50 @@ namespace SharpAESCrypt
         public long EncryptedDataSize { get; set; }
 
         /// <summary>
+        /// 已耗费的时间(单位:秒)
+        /// </summary>
+        public int ElapsedSeconds { get; set; }
+        /// <summary>
         /// 此次加密的数据长度
         /// </summary>
         public long EncryptedBlockSize { get; set; }
+
+        private long MB_Value = 1024 * 1024; //1MB对应的字节数
+        /// <summary>
+        /// 处理速速
+        /// </summary>
+        public string EncryptSpeed
+        {
+            get
+            {
+                if (EncryptedDataSize <= 0)
+                    return "未记录处理记录";
+                if (ElapsedSeconds <= 0)
+                    return "未记录耗时";
+                string speed = "---";
+                var WriteSpeed = (decimal)EncryptedDataSize / ElapsedSeconds;
+                if(WriteSpeed < 1024)
+                {
+                    speed = Math.Round(WriteSpeed, 2) + "Byte/s";
+                }
+                else if (WriteSpeed >= 1024 && WriteSpeed < (MB_Value))
+                {
+                    speed = Math.Round(WriteSpeed / 1024, 2) + "KB/s";
+                }
+                else
+                {
+                    speed = Math.Round(WriteSpeed / (MB_Value), 2) + "MB/s";
+                }
+
+                if(OriginalFileSize > 0)
+                {
+                    var estimateElapsed = OriginalFileSize / WriteSpeed;
+                    speed += $";已耗时:{TimeSpan.FromSeconds(ElapsedSeconds)} / 预计总耗时: {TimeSpan.FromSeconds((double)estimateElapsed).ToString()}";
+                }
+
+                return speed;
+            }
+        }
 
         public EncryptProgressReportEventArgs()
         {

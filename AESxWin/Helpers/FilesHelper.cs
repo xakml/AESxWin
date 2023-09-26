@@ -89,6 +89,11 @@ namespace AESxWin.Helpers
             return paths;
         }
 
+        /// <summary>
+        /// 获取文件的扩展名
+        /// </summary>
+        /// <param name="extentions">文件路径</param>
+        /// <returns></returns>
         public static IEnumerable<string> ParseExtensions(this string extentions)
         {
             var exts = new List<string>();

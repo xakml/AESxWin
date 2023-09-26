@@ -30,6 +30,7 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainWindow));
             this.gbPaths = new System.Windows.Forms.GroupBox();
+            this.btnHdTest = new System.Windows.Forms.Button();
             this.btnSelectFolder = new System.Windows.Forms.Button();
             this.txtOutputFolder = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
@@ -61,9 +62,8 @@
             this.nudCustomBlockSize = new System.Windows.Forms.NumericUpDown();
             this.label2 = new System.Windows.Forms.Label();
             this.lblSpeed = new System.Windows.Forms.Label();
-            this.progressEncryptAllFiles = new AESxWin.ProgressAll();
             this.llblClearOutput = new System.Windows.Forms.LinkLabel();
-            this.btnHdTest = new System.Windows.Forms.Button();
+            this.progressEncryptAllFiles = new AESxWin.ProgressAll();
             this.gbPaths.SuspendLayout();
             this.gbOptions.SuspendLayout();
             this.gbPassword.SuspendLayout();
@@ -90,6 +90,16 @@
             this.gbPaths.TabIndex = 0;
             this.gbPaths.TabStop = false;
             this.gbPaths.Text = "Paths";
+            // 
+            // btnHdTest
+            // 
+            this.btnHdTest.Location = new System.Drawing.Point(523, 87);
+            this.btnHdTest.Name = "btnHdTest";
+            this.btnHdTest.Size = new System.Drawing.Size(75, 23);
+            this.btnHdTest.TabIndex = 7;
+            this.btnHdTest.Text = "HD TEST";
+            this.btnHdTest.UseVisualStyleBackColor = true;
+            this.btnHdTest.Click += new System.EventHandler(this.btnHdTest_Click);
             // 
             // btnSelectFolder
             // 
@@ -224,7 +234,7 @@
             "(All Files)"});
             this.lstExts.Location = new System.Drawing.Point(277, 37);
             this.lstExts.Name = "lstExts";
-            this.lstExts.Size = new System.Drawing.Size(121, 20);
+            this.lstExts.Size = new System.Drawing.Size(234, 20);
             this.lstExts.TabIndex = 2;
             // 
             // chkSubFolders
@@ -460,6 +470,17 @@
             this.lblSpeed.TabIndex = 10;
             this.lblSpeed.Text = "label4";
             // 
+            // llblClearOutput
+            // 
+            this.llblClearOutput.AutoSize = true;
+            this.llblClearOutput.Location = new System.Drawing.Point(72, 459);
+            this.llblClearOutput.Name = "llblClearOutput";
+            this.llblClearOutput.Size = new System.Drawing.Size(53, 12);
+            this.llblClearOutput.TabIndex = 11;
+            this.llblClearOutput.TabStop = true;
+            this.llblClearOutput.Text = "清除输出";
+            this.llblClearOutput.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.llblClearOutput_LinkClicked);
+            // 
             // progressEncryptAllFiles
             // 
             this.progressEncryptAllFiles.Dock = System.Windows.Forms.DockStyle.Bottom;
@@ -472,25 +493,6 @@
             this.progressEncryptAllFiles.TabIndex = 8;
             this.progressEncryptAllFiles.Value = 0;
             this.progressEncryptAllFiles.Visible = false;
-            // 
-            // llblClearOutput
-            // btnHdTest
-            // 
-            this.llblClearOutput.AutoSize = true;
-            this.llblClearOutput.Location = new System.Drawing.Point(72, 459);
-            this.llblClearOutput.Name = "llblClearOutput";
-            this.llblClearOutput.Size = new System.Drawing.Size(53, 12);
-            this.llblClearOutput.TabIndex = 11;
-            this.llblClearOutput.TabStop = true;
-            this.llblClearOutput.Text = "清除输出";
-            this.llblClearOutput.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.llblClearOutput_LinkClicked);
-            this.btnHdTest.Location = new System.Drawing.Point(523, 87);
-            this.btnHdTest.Name = "btnHdTest";
-            this.btnHdTest.Size = new System.Drawing.Size(75, 23);
-            this.btnHdTest.TabIndex = 7;
-            this.btnHdTest.Text = "HD TEST";
-            this.btnHdTest.UseVisualStyleBackColor = true;
-            this.btnHdTest.Click += new System.EventHandler(this.btnHdTest_Click);
             // 
             // MainWindow
             // 
