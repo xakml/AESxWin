@@ -13,6 +13,8 @@ namespace AESxWin
     {
         private static readonly string ORIGINAL_FILENAME = "OFN";
 
+        private List<FileInfo> AllFiles = null;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -94,7 +96,11 @@ namespace AESxWin
                 {
                     var items = lstPaths.Items;
                     if (!items.Contains(folderPath))
+                    {
                         lstPaths.Items.Add(folderPath);
+                        long size = folderPath.GetDirectorySize(out int filesCount);
+                        this.label5.Text = $"共计:{size.GetFriendlyReadStyle()}, 文件总数: {filesCount}";
+                    }
                     else
                         this.Log(folderPath + " is already exist in the list.");
                 }

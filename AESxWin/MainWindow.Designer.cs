@@ -63,6 +63,7 @@
             this.label2 = new System.Windows.Forms.Label();
             this.lblSpeed = new System.Windows.Forms.Label();
             this.llblClearOutput = new System.Windows.Forms.LinkLabel();
+            this.label5 = new System.Windows.Forms.Label();
             this.progressEncryptAllFiles = new AESxWin.ProgressAll();
             this.gbPaths.SuspendLayout();
             this.gbOptions.SuspendLayout();
@@ -76,6 +77,7 @@
             // 
             this.gbPaths.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.gbPaths.Controls.Add(this.label5);
             this.gbPaths.Controls.Add(this.btnHdTest);
             this.gbPaths.Controls.Add(this.btnSelectFolder);
             this.gbPaths.Controls.Add(this.txtOutputFolder);
@@ -93,7 +95,7 @@
             // 
             // btnHdTest
             // 
-            this.btnHdTest.Location = new System.Drawing.Point(523, 87);
+            this.btnHdTest.Location = new System.Drawing.Point(665, 86);
             this.btnHdTest.Name = "btnHdTest";
             this.btnHdTest.Size = new System.Drawing.Size(75, 23);
             this.btnHdTest.TabIndex = 7;
@@ -129,7 +131,7 @@
             // 
             // btnRemovePath
             // 
-            this.btnRemovePath.Location = new System.Drawing.Point(323, 88);
+            this.btnRemovePath.Location = new System.Drawing.Point(584, 88);
             this.btnRemovePath.Name = "btnRemovePath";
             this.btnRemovePath.Size = new System.Drawing.Size(75, 21);
             this.btnRemovePath.TabIndex = 3;
@@ -481,6 +483,16 @@
             this.llblClearOutput.Text = "清除输出";
             this.llblClearOutput.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.llblClearOutput_LinkClicked);
             // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.ForeColor = System.Drawing.SystemColors.HotTrack;
+            this.label5.Location = new System.Drawing.Point(178, 92);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(41, 12);
+            this.label5.TabIndex = 8;
+            this.label5.Text = "label5";
+            // 
             // progressEncryptAllFiles
             // 
             this.progressEncryptAllFiles.Dock = System.Windows.Forms.DockStyle.Bottom;
@@ -571,6 +583,7 @@
         private System.Windows.Forms.CheckBox chkUseMd5ValueAsOutputFileName;
         private System.Windows.Forms.LinkLabel llblClearOutput;
         private System.Windows.Forms.Button btnHdTest;
+        private System.Windows.Forms.Label label5;
     }
 }
 

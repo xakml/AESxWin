@@ -90,6 +90,39 @@ namespace AESxWin.Helpers
         }
 
         /// <summary>
+        /// 查询目录的磁盘空间占用
+        /// </summary>
+        /// <param name="dir_path"></param>
+        /// <returns></returns>
+        public static long GetDirectorySize(this string dir_path,out int filesCount)
+        {
+            filesCount = 0;
+            if (!System.IO.Directory.Exists(dir_path))
+                return 0;
+            long len = 0;
+            DirectoryInfo di = new DirectoryInfo(dir_path);
+            var filesInfo = di.GetFiles();
+            if (filesInfo != null && filesInfo.Length > 0)
+            {
+                foreach (FileInfo item in filesInfo)
+                {
+                    filesCount++;
+                    len += item.Length;
+                }
+            }
+            DirectoryInfo[] dis = di.GetDirectories();
+            if (dis.Length > 0)
+            {
+                for (int i = 0; i < dis.Length; i++)
+                {
+                    len += GetDirectorySize(dis[i].FullName,out int subFilesCount);//递归dis.Length个文件夹,得到每隔dis[i]下面所有文件的大小
+                    filesCount += subFilesCount;
+                }
+            }
+            return len;
+        }
+
+        /// <summary>
         /// 获取文件的扩展名
         /// </summary>
         /// <param name="extentions">文件路径</param>
@@ -128,6 +161,30 @@ namespace AESxWin.Helpers
                 }
             }
             return false;
+        }
+        private static readonly long MB_Value = 1024 * 1024; //1MB对应的字节数
+        /// <summary>
+        /// 转换字节数对应的友好书写方式(精确到两位小数)
+        /// </summary>
+        /// <param name="bytes"></param>
+        /// <returns></returns>
+        public static string GetFriendlyReadStyle(this long bytes)
+        {
+            string speed = "";
+            if (bytes < 1024)
+            {
+                speed = $"{bytes}Byte/s";
+            }
+            else if (bytes >= 1024 && bytes < (MB_Value))
+            {
+                speed = Math.Round((double)bytes / 1024, 2) + "KB";
+            }
+            else
+            {
+                speed = Math.Round((double)bytes / (MB_Value), 2) + "MB";
+            }
+            return speed;
+
         }
 
     }
