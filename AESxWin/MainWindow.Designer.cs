@@ -30,6 +30,7 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainWindow));
             this.gbPaths = new System.Windows.Forms.GroupBox();
+            this.label5 = new System.Windows.Forms.Label();
             this.btnHdTest = new System.Windows.Forms.Button();
             this.btnSelectFolder = new System.Windows.Forms.Button();
             this.txtOutputFolder = new System.Windows.Forms.TextBox();
@@ -63,8 +64,8 @@
             this.label2 = new System.Windows.Forms.Label();
             this.lblSpeed = new System.Windows.Forms.Label();
             this.llblClearOutput = new System.Windows.Forms.LinkLabel();
-            this.label5 = new System.Windows.Forms.Label();
             this.progressEncryptAllFiles = new AESxWin.ProgressAll();
+            this.label6 = new System.Windows.Forms.Label();
             this.gbPaths.SuspendLayout();
             this.gbOptions.SuspendLayout();
             this.gbPassword.SuspendLayout();
@@ -77,6 +78,7 @@
             // 
             this.gbPaths.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.gbPaths.Controls.Add(this.label6);
             this.gbPaths.Controls.Add(this.label5);
             this.gbPaths.Controls.Add(this.btnHdTest);
             this.gbPaths.Controls.Add(this.btnSelectFolder);
@@ -92,6 +94,16 @@
             this.gbPaths.TabIndex = 0;
             this.gbPaths.TabStop = false;
             this.gbPaths.Text = "Paths";
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.ForeColor = System.Drawing.SystemColors.HotTrack;
+            this.label5.Location = new System.Drawing.Point(178, 92);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(41, 12);
+            this.label5.TabIndex = 8;
+            this.label5.Text = "label5";
             // 
             // btnHdTest
             // 
@@ -483,16 +495,6 @@
             this.llblClearOutput.Text = "清除输出";
             this.llblClearOutput.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.llblClearOutput_LinkClicked);
             // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.ForeColor = System.Drawing.SystemColors.HotTrack;
-            this.label5.Location = new System.Drawing.Point(178, 92);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(41, 12);
-            this.label5.TabIndex = 8;
-            this.label5.Text = "label5";
-            // 
             // progressEncryptAllFiles
             // 
             this.progressEncryptAllFiles.Dock = System.Windows.Forms.DockStyle.Bottom;
@@ -505,6 +507,15 @@
             this.progressEncryptAllFiles.TabIndex = 8;
             this.progressEncryptAllFiles.Value = 0;
             this.progressEncryptAllFiles.Visible = false;
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(544, 133);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(41, 12);
+            this.label6.TabIndex = 9;
+            this.label6.Text = "label6";
             // 
             // MainWindow
             // 
@@ -584,6 +595,7 @@
         private System.Windows.Forms.LinkLabel llblClearOutput;
         private System.Windows.Forms.Button btnHdTest;
         private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Label label6;
     }
 }
 

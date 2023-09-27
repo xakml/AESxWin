@@ -123,6 +123,29 @@ namespace AESxWin.Helpers
         }
 
         /// <summary>
+        /// 读取指定路径所属磁盘的剩余空间
+        /// </summary>
+        /// <param name="path">路径可以是文件夹或文件</param>
+        /// <returns></returns>
+        public static long GetFreespaceOfDisk(this string path)
+        {
+            if (!System.IO.File.Exists(path) && !System.IO.Directory.Exists(path))
+                throw new IOException("invalid path");
+            if (System.IO.File.Exists(path))
+            {
+                var fileInfo = new FileInfo(path);
+                DriveInfo di = new DriveInfo(fileInfo.Directory.Root.FullName);
+                return di.AvailableFreeSpace;
+            }
+            if (System.IO.Directory.Exists(path))
+            {
+                DirectoryInfo dir = new DirectoryInfo(path);
+                DriveInfo di = new DriveInfo(dir.Root.FullName);
+                return di.AvailableFreeSpace;
+            }
+            return -1;
+        }
+        /// <summary>
         /// 获取文件的扩展名
         /// </summary>
         /// <param name="extentions">文件路径</param>
@@ -163,6 +186,7 @@ namespace AESxWin.Helpers
             return false;
         }
         private static readonly long MB_Value = 1024 * 1024; //1MB对应的字节数
+        private static readonly long GB_Value = 1024 * 1024 * 1024; //1MB对应的字节数
         /// <summary>
         /// 转换字节数对应的友好书写方式(精确到两位小数)
         /// </summary>
@@ -170,20 +194,24 @@ namespace AESxWin.Helpers
         /// <returns></returns>
         public static string GetFriendlyReadStyle(this long bytes)
         {
-            string speed = "";
+            string friendlyText = "";
             if (bytes < 1024)
             {
-                speed = $"{bytes}Byte/s";
+                friendlyText = $"{bytes} Byte/s";
             }
             else if (bytes >= 1024 && bytes < (MB_Value))
             {
-                speed = Math.Round((double)bytes / 1024, 2) + "KB";
+                friendlyText = Math.Round((double)bytes / 1024, 2) + " KB";
+            }
+            else if(bytes >= MB_Value && bytes < GB_Value)
+            {
+                friendlyText = Math.Round((double)bytes / (MB_Value), 2) + " MB";
             }
             else
             {
-                speed = Math.Round((double)bytes / (MB_Value), 2) + "MB";
+                friendlyText = Math.Round((double)bytes / (GB_Value), 2) + " GB";
             }
-            return speed;
+            return friendlyText;
 
         }
 

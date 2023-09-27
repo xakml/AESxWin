@@ -13,7 +13,10 @@ namespace AESxWin
     {
         private static readonly string ORIGINAL_FILENAME = "OFN";
 
-        private List<FileInfo> AllFiles = null;
+        /// <summary>
+        /// 文件夹源
+        /// </summary>
+        private Folder srcDir = null;
 
         public MainWindow()
         {
@@ -39,6 +42,12 @@ namespace AESxWin
         {
             lstExts.SelectedIndex = 6;
             this.lblSpeed.Text = string.Empty;
+            string defaultOutputFolder = Path.Combine(Application.StartupPath, "output");
+            if (!Directory.Exists(defaultOutputFolder))
+                Directory.CreateDirectory(defaultOutputFolder);
+            this.txtOutputFolder.Text = defaultOutputFolder;
+            long freespace = defaultOutputFolder.GetFreespaceOfDisk();
+            this.label6.Text = "free space: " + freespace.GetFriendlyReadStyle() ;
         }
 
         #region 添加文件 , 文件夹
@@ -98,7 +107,9 @@ namespace AESxWin
                     if (!items.Contains(folderPath))
                     {
                         lstPaths.Items.Add(folderPath);
+                        //Directory.GetFiles("", "", SearchOption.AllDirectories);
                         long size = folderPath.GetDirectorySize(out int filesCount);
+                        srcDir = new Folder() { DiskSpaceUsageBytes = size };
                         this.label5.Text = $"共计:{size.GetFriendlyReadStyle()}, 文件总数: {filesCount}";
                     }
                     else
@@ -678,6 +689,8 @@ namespace AESxWin
                 {
                     var folderPath = folderDialog.SelectedPath;
                     this.txtOutputFolder.Text = folderPath;
+                    long freespace = folderPath.GetFreespaceOfDisk();
+                    this.label6.Text = "free space: " + freespace.GetFriendlyReadStyle();
                 }
             }
         }
@@ -766,6 +779,13 @@ namespace AESxWin
         {
             FrmDiskRMTest test = new FrmDiskRMTest();
             test.ShowDialog();
+        }
+
+        public class Folder
+        {
+            public List<FileInfo> AllFiles { get; set; }
+
+            public long DiskSpaceUsageBytes { get; set; }
         }
     }
 }
