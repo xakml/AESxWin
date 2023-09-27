@@ -74,7 +74,6 @@ namespace AESxWin.Helpers
                     foreach (var path in subFolders)
                     {
                         paths.AddRange(GetFolderFilesPaths(path));
-
                     }
 
                 }

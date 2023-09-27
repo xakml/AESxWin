@@ -715,7 +715,7 @@ namespace AESxWin
         /// 加密文件（单个文件）
         /// </summary>
         /// <param name="file_fullname"></param>
-        private async Task EncryptFile(string file_fullname,string password)
+        private async Task EncryptFile(string file_fullname,string output_dir,string password)
         {
             var file_extension = Path.GetExtension(file_fullname);
             var file_name = Path.GetFileName(file_fullname);
@@ -728,7 +728,10 @@ namespace AESxWin
             KeyValuePair<string, byte[]> extension_header = new KeyValuePair<string, byte[]>(ORIGINAL_FILENAME, fileName_data);
 
             string folder = Path.GetDirectoryName(file_fullname);
-
+            if (!string.IsNullOrEmpty(output_dir))
+                folder = output_dir;
+            if (!Directory.Exists(folder))
+                Directory.CreateDirectory(folder);
             //compute hash value of file
             string original_file_hash_value = md5Helper.GetMD5HexOfFile(file_fullname);
             string outputfile = Path.Combine(folder, original_file_hash_value + ".aes");
@@ -751,19 +754,32 @@ namespace AESxWin
         {
             var followSubDirs = chkSubFolders.Checked ? true : false;
             var allfiles = directoryName.GetFolderFilesPaths(followSubDirs);
+            if (allfiles == null || allfiles.Count == 0                )
+            {
+                this.Log($"未发现任何文件,在目录: {directoryName}");
+                return;
+            }
             this.progressEncryptAllFiles.Maximum = allfiles.Count();
             this.progressEncryptAllFiles.Minimum = 0;
             this.progressEncryptAllFiles.Value = 0;
             this.progressEncryptAllFiles.Step = 1;
             this.progressEncryptAllFiles.Visible = true;// = 1;
+            string outputFolder = this.txtOutputFolder.Text;
+            if (!string.IsNullOrEmpty(outputFolder) && !Directory.Exists(outputFolder))
+                Directory.CreateDirectory(outputFolder);
 
            await Task.Run(() =>
             {
-                Parallel.For(0, allfiles.Count,
-               new ParallelOptions() { MaxDegreeOfParallelism = Environment.ProcessorCount - 1 },
+                Parallel.For(
+                    0,
+                    allfiles.Count,
+                    new ParallelOptions() { MaxDegreeOfParallelism = Environment.ProcessorCount - 1 },
                async i =>
                {
-                   await EncryptFile(allfiles[i], password);
+                   string output_dir = null;
+                   if(Directory.Exists(outputFolder))
+                       output_dir = Path.Combine(outputFolder, Path.GetDirectoryName(allfiles[i].Substring(directoryName.Length + 1)));
+                   await EncryptFile(allfiles[i], output_dir, password);
                    this.progressEncryptAllFilesPerformStep();
                });
             });
