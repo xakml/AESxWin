@@ -25,5 +25,13 @@ namespace AESxWin.Test
             Assert.AreEqual(".aes", ext);
 
         }
+
+        [TestMethod]
+        public void TestEncryptString()
+        {
+            string content = "JC-CNHM.2022-09-01.15.log";
+            byte[] data = SharpAESCrypt.SharpAESCrypt.EncryptStringData("!GlPM!nt#1NO", content);
+            Console.WriteLine(BitConverter.ToString(data).Replace("-", ""));
+        }
     }
 }
