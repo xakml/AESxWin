@@ -151,6 +151,10 @@ namespace AESxWin
                 this.btnEncrypt.Enabled = false;
                 this.btnDecrypt.Enabled = false;
                var md5Helper =new Xakml.Common.Toolkit.MD5Helper();
+                string pwd = this.txtPassword.Text;
+                var dlgResult = MessageBox.Show("此次加密密码： " + pwd + "\r\n请牢记！是否继续","加密提醒", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1);
+                if (dlgResult != DialogResult.Yes)
+                    return;
                 foreach (string path in paths)
                 {
                     if (File.Exists(path)) // Is File 
