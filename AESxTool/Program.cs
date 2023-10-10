@@ -1,5 +1,7 @@
-﻿using OutputColorizer;
+﻿using LoadingDots;
+using OutputColorizer;
 using System.IO;
+using System.Runtime;
 
 namespace AESxTool
 {
@@ -41,6 +43,10 @@ namespace AESxTool
             #region 配置提示
             if (defaultProfile != null)
             {
+                if (!Directory.Exists(defaultProfile.OutputDir))
+                    Directory.CreateDirectory(defaultProfile.OutputDir);
+                OutputColorizer.Colorizer.WriteLine("[Green!目标输出目录：{0}]", defaultProfile.OutputDir);
+
                 if (!ProfileExists)
                 {
                     OutputColorizer.Colorizer.WriteLine("[Yellow!尚未手动指定ProfileSetting，系统生成默认的配置文件，请注意！]");
@@ -68,13 +74,19 @@ namespace AESxTool
                 {
                     if (Directory.Exists(args[0]))
                     {
+                        var dots = new Dots("encrypting files");
+                        dots.Start();
                         //TODO: 目录操作
                         await EncryptFolder(args[0], defaultProfile.OutputDir, defaultProfile.Pwd, defaultProfile.IncludeSubFolders);
+                        dots.End();
                     }
                     if (File.Exists(args[0]))
                     {
+                        var dots = new Dots("encrypting file");
+                        dots.Start();
                         //TODO:单个文件操作
-                       await EncryptSingleFile(args[0],null, defaultProfile.Pwd);
+                        await EncryptSingleFile(args[0],null, defaultProfile.Pwd);
+                        dots.End();
                     }
                 }
             }
@@ -130,12 +142,12 @@ namespace AESxTool
             await Console.Out.WriteLineAsync(Path.GetFileName(inputFile) + " Encrypted." + outputfile);
         }
 
-        static async Task EncryptFolder(string intputFolder,string? outputFolder,string password,bool followSubDirs = false)
+        static async Task EncryptFolder(string inputFolder,string? outputFolder,string password,bool followSubDirs = false)
         {
-            var allfiles = intputFolder.GetFolderFilesPaths(followSubDirs);
+            var allfiles = inputFolder.GetFolderFilesPaths(followSubDirs);
             if (allfiles == null || allfiles.Count == 0)
             {
-                Colorizer.WriteLine("[Red!未发现任何文件,在目录: {0}]", intputFolder);
+                Colorizer.WriteLine("[Red!未发现任何文件,在目录: {0}]", inputFolder);
                 return;
             }
             //this.progressEncryptAllFiles.Maximum = allfiles.Count();
@@ -146,7 +158,8 @@ namespace AESxTool
             //string outputFolder = this.txtOutputFolder.Text;
             if (!string.IsNullOrEmpty(outputFolder) && !Directory.Exists(outputFolder))
                 Directory.CreateDirectory(outputFolder);
-
+            var totalSize = inputFolder.GetDirectorySize(out int totalFiles);
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             await Task.Run(() =>
             {
                 Parallel.For(
@@ -157,11 +170,13 @@ namespace AESxTool
                {
                    string output_dir = null;
                    if (Directory.Exists(outputFolder))
-                       output_dir = Path.Combine(outputFolder, Path.GetDirectoryName(allfiles[i].Substring(intputFolder.Length + 1)));
+                       output_dir = Path.Combine(outputFolder, Path.GetDirectoryName(allfiles[i].Substring(inputFolder.Length + 1)));
                    await EncryptFile(allfiles[i], output_dir, password);
                    //this.progressEncryptAllFilesPerformStep();
                });
             });
+            stopwatch.Stop();
+            await Console.Out.WriteLineAsync($"总耗时：{stopwatch.Elapsed}, 处理文件总量：{totalSize.GetFriendlyReadStyle()}, 处理速率：{((long)(totalSize / stopwatch.Elapsed.TotalSeconds)).GetFriendlyReadStyle()}/s" );
         }
 
         /// <summary>
