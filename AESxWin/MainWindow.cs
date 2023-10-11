@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Security;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -12,7 +13,11 @@ namespace AESxWin
     public partial class MainWindow : Form
     {
         private static readonly string ORIGINAL_FILENAME = "OFN";
-
+        //private static readonly SecureString
+        /// <summary>
+        /// 加密后的文件扩展名
+        /// </summary>
+        private static readonly string ENCRYPT_FILE_EXTENSION = "ae";
         /// <summary>
         /// 文件夹源
         /// </summary>
@@ -179,9 +184,9 @@ namespace AESxWin
                                     this.Log("文件校验和耗时:" + stopwatch_hash.Elapsed);
                                     return hashString;
                                 });
-                                string outputfile = Path.Combine(folder, original_file_hash_value + ".aes");
+                                string outputfile = Path.Combine(folder, original_file_hash_value + "."+ ENCRYPT_FILE_EXTENSION);
                                 if (File.Exists(outputfile))
-                                    outputfile = Xakml.Common.StringTools.Strings.GetNextFileName(folder, original_file_hash_value, "aes");
+                                    outputfile = Xakml.Common.StringTools.Strings.GetNextFileName(folder, original_file_hash_value, ENCRYPT_FILE_EXTENSION);
                                 using (FileStream outfs = File.Create(outputfile))
                                 {
                                     var aes = new SharpAESCrypt.SharpAESCrypt(txtPassword.Text, outfs, extension_header, SharpAESCrypt.OperationMode.Encrypt);
