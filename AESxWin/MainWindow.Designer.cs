@@ -30,6 +30,7 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainWindow));
             this.gbPaths = new System.Windows.Forms.GroupBox();
+            this.label6 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.btnHdTest = new System.Windows.Forms.Button();
             this.btnSelectFolder = new System.Windows.Forms.Button();
@@ -65,7 +66,8 @@
             this.lblSpeed = new System.Windows.Forms.Label();
             this.llblClearOutput = new System.Windows.Forms.LinkLabel();
             this.progressEncryptAllFiles = new AESxWin.ProgressAll();
-            this.label6 = new System.Windows.Forms.Label();
+            this.btnRemoveAll = new System.Windows.Forms.Button();
+            this.chkMoveToBackupDir = new System.Windows.Forms.CheckBox();
             this.gbPaths.SuspendLayout();
             this.gbOptions.SuspendLayout();
             this.gbPassword.SuspendLayout();
@@ -78,6 +80,7 @@
             // 
             this.gbPaths.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.gbPaths.Controls.Add(this.btnRemoveAll);
             this.gbPaths.Controls.Add(this.label6);
             this.gbPaths.Controls.Add(this.label5);
             this.gbPaths.Controls.Add(this.btnHdTest);
@@ -94,6 +97,15 @@
             this.gbPaths.TabIndex = 0;
             this.gbPaths.TabStop = false;
             this.gbPaths.Text = "Paths";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(544, 133);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(41, 12);
+            this.label6.TabIndex = 9;
+            this.label6.Text = "label6";
             // 
             // label5
             // 
@@ -143,7 +155,7 @@
             // 
             // btnRemovePath
             // 
-            this.btnRemovePath.Location = new System.Drawing.Point(584, 88);
+            this.btnRemovePath.Location = new System.Drawing.Point(480, 88);
             this.btnRemovePath.Name = "btnRemovePath";
             this.btnRemovePath.Size = new System.Drawing.Size(75, 21);
             this.btnRemovePath.TabIndex = 3;
@@ -190,6 +202,7 @@
             // 
             this.gbOptions.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.gbOptions.Controls.Add(this.chkMoveToBackupDir);
             this.gbOptions.Controls.Add(this.chkUseMd5ValueAsOutputFileName);
             this.gbOptions.Controls.Add(this.chkIgnoreEncryptedFiles);
             this.gbOptions.Controls.Add(this.label1);
@@ -248,7 +261,7 @@
             "(All Files)"});
             this.lstExts.Location = new System.Drawing.Point(277, 37);
             this.lstExts.Name = "lstExts";
-            this.lstExts.Size = new System.Drawing.Size(234, 20);
+            this.lstExts.Size = new System.Drawing.Size(140, 20);
             this.lstExts.TabIndex = 2;
             // 
             // chkSubFolders
@@ -508,14 +521,25 @@
             this.progressEncryptAllFiles.Value = 0;
             this.progressEncryptAllFiles.Visible = false;
             // 
-            // label6
+            // btnRemoveAll
             // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(544, 133);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(41, 12);
-            this.label6.TabIndex = 9;
-            this.label6.Text = "label6";
+            this.btnRemoveAll.Location = new System.Drawing.Point(570, 88);
+            this.btnRemoveAll.Name = "btnRemoveAll";
+            this.btnRemoveAll.Size = new System.Drawing.Size(75, 21);
+            this.btnRemoveAll.TabIndex = 10;
+            this.btnRemoveAll.Text = "Remove All";
+            this.btnRemoveAll.UseVisualStyleBackColor = true;
+            this.btnRemoveAll.Click += new System.EventHandler(this.RemoveAllOriginalFile_Click);
+            // 
+            // chkMoveToBackupDir
+            // 
+            this.chkMoveToBackupDir.AutoSize = true;
+            this.chkMoveToBackupDir.Location = new System.Drawing.Point(433, 39);
+            this.chkMoveToBackupDir.Name = "chkMoveToBackupDir";
+            this.chkMoveToBackupDir.Size = new System.Drawing.Size(252, 16);
+            this.chkMoveToBackupDir.TabIndex = 6;
+            this.chkMoveToBackupDir.Text = "&Move original file to backup directory";
+            this.chkMoveToBackupDir.UseVisualStyleBackColor = true;
             // 
             // MainWindow
             // 
@@ -596,6 +620,8 @@
         private System.Windows.Forms.Button btnHdTest;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.Button btnRemoveAll;
+        private System.Windows.Forms.CheckBox chkMoveToBackupDir;
     }
 }
 

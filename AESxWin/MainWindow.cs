@@ -135,6 +135,12 @@ namespace AESxWin
                 lstPaths.Focus();
             }
         }
+        //移除所有的原始文件
+        private void RemoveAllOriginalFile_Click(object sender, EventArgs e)
+        {
+            if(lstPaths.Items.Count > 0)
+                lstPaths.Items.Clear();
+        }
 
         #region 加解密
         //Encrypt
@@ -155,11 +161,15 @@ namespace AESxWin
             {
                 this.btnEncrypt.Enabled = false;
                 this.btnDecrypt.Enabled = false;
+                this.btnRemovePath.Enabled = false;
+                this.btnRemoveAll.Enabled = false;
+
                var md5Helper =new Xakml.Common.Toolkit.MD5Helper();
                 string pwd = this.txtPassword.Text;
                 var dlgResult = MessageBox.Show("此次加密密码： " + pwd + "\r\n请牢记！是否继续","加密提醒", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1);
                 if (dlgResult != DialogResult.Yes)
                     return;
+                this.txtLog.Clear();
                 foreach (string path in paths)
                 {
                     if (File.Exists(path)) // Is File 
@@ -203,6 +213,16 @@ namespace AESxWin
 
                                 if (chkDeleteOrg.Checked)
                                     File.Delete(path);
+                                //TODO: 移动
+                                if (chkMoveToBackupDir.Checked)
+                                {
+                                    var parentDir = Path.GetDirectoryName(path);
+                                    var backupDir = Path.Combine(parentDir, "original_files");
+                                    if (!Directory.Exists(backupDir))
+                                        Directory.CreateDirectory(backupDir);
+                                    var backupFile = Path.Combine(backupDir, Path.GetFileName(path));
+                                    File.Move(path, backupFile);
+                                }
                             }
                             catch (Exception ex)
                             {
@@ -273,6 +293,8 @@ namespace AESxWin
                 this.btnEncrypt.Enabled = true;
             if(!this.btnDecrypt.Enabled)
                 this.btnDecrypt.Enabled = true;
+            this.btnRemovePath.Enabled = true;
+            this.btnRemoveAll.Enabled = true;
         }
 
         //Dencrypt

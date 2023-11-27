@@ -144,6 +144,7 @@ namespace AESxWin.Helpers
             }
             return -1;
         }
+
         /// <summary>
         /// 获取文件的扩展名
         /// </summary>

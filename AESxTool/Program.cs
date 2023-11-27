@@ -94,7 +94,7 @@ namespace AESxTool
             {
                 Console.WriteLine("empty args");
             }
-            Console.WriteLine("Hello, World!");
+            Console.WriteLine("press any key to exit!");
             Console.ReadKey();
 
         }
